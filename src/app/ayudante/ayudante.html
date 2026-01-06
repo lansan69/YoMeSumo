@@ -1,20 +1,43 @@
-<div class="bg-white/50bg-brand-cream text-gray-800 font-sans overflow-hidden">
-    <div class="flex h-screen w-full">
+<div class="bg-brand-cream text-gray-800 font-sans overflow-hidden h-screen w-full relative">
 
-        <aside class="flex-none h-full z-20">
-            <app-aside (screenChange)="changeScreen($event)"  (logout)="logOut()" (currentUsr)="getUser($event)" class="h-full block">
+    <div *ngIf="isSidebarOpen" (click)="isSidebarOpen = false"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden transition-opacity">
+    </div>
+
+    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-brand-cream border-r border-brand-light shadow-2xl transform transition-transform duration-300 md:hidden"
+        [class.-translate-x-full]="!isSidebarOpen" [class.translate-x-0]="isSidebarOpen">
+        <app-aside (screenChange)="changeScreen($event); isSidebarOpen = false" (logout)="logOut()"
+            (currentUsr)="getUser($event)" class="h-full block">
+        </app-aside>
+    </div>
+
+    <div class="flex h-full w-full">
+
+        <aside class="hidden md:block flex-none w-64 h-full z-20 border-r border-brand-light/20">
+            <app-aside (screenChange)="changeScreen($event)" (logout)="logOut()" (currentUsr)="getUser($event)"
+                class="h-full block">
             </app-aside>
         </aside>
 
-        <div class="explorar" *ngIf="this.currentScreen == 'llamados'">
-            <main class="flex-1 flex flex-col min-w-0 relative">
+        <div class="explorar flex-1 flex flex-col h-full min-w-0 overflow-hidden"
+            *ngIf="this.currentScreen == 'llamados'">
 
-                <nav
-                    class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 md:px-6 flex items-center gap-4 shadow-sm md:shadow-none">
+            <nav
+                class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm">
 
-                    <div class="relative shrink-0">
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button (click)="isSidebarOpen = !isSidebarOpen"
+                        class="md:hidden p-2 text-brand-dark hover:bg-black/5 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+
+                    <div class="relative shrink-0 flex-1 sm:flex-none">
                         <select (change)="setcategory($event)"
-                            class="appearance-none bg-transparent font-semibold text-brand-dark py-2 pl-3 pr-8 rounded-full hover:bg-black/5 cursor-pointer focus:outline-none transition-colors">
+                            class="w-full sm:w-auto appearance-none bg-transparent font-semibold text-brand-dark py-2 pl-3 pr-8 rounded-full hover:bg-black/5 cursor-pointer focus:outline-none transition-colors">
                             <option value="publicaciones">Publicaciones</option>
                             <option value="asociaciones">Asociaciones</option>
                         </select>
@@ -25,56 +48,65 @@
                             </svg>
                         </div>
                     </div>
-
-                    <div class="flex-1 max-w-4xl mx-auto">
-                        <div class="relative group">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-brand-dark/70 group-focus-within:text-brand-dark" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <input (input)="filterSearch($event)" type="text"
-                                class="block w-full bg-brand-light/30 text-gray-900 rounded-full py-3 pl-12 pr-4 placeholder-brand-dark/70 focus:outline-none focus:ring-2 focus:ring-brand-medium/50 focus:bg-white transition-all shadow-inner"
-                                placeholder="Search...">
-                        </div>
-                    </div>
-                </nav>
-
-
-                <div class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6">
-                    <app-main [searchterm]="getSearch()" [category]="getcategory()" [currentUser]="this.currentUser" class="block w-full h-full">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pb-20">
-                            <div class="h-64 rounded-2xl bg-brand-light/40"></div>
-                            <div class="h-96 rounded-2xl bg-brand-medium/30"></div>
-                            <div class="h-72 rounded-2xl bg-brand-dark/20"></div>
-                            <div class="h-80 rounded-2xl bg-white shadow-sm border border-brand-light"></div>
-                            <div class="h-60 rounded-2xl bg-brand-medium/30"></div>
-                            <div class="h-80 rounded-2xl bg-brand-light/40"></div>
-                        </div>
-                    </app-main>
                 </div>
 
-            </main>
+                <div class="flex-1 w-full max-w-4xl mx-auto">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-brand-dark/70 group-focus-within:text-brand-dark" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input (input)="filterSearch($event)" type="text"
+                            class="block w-full bg-brand-light/30 text-gray-900 rounded-full py-2 sm:py-3 pl-12 pr-4 placeholder-brand-dark/70 focus:outline-none focus:ring-2 focus:ring-brand-medium/50 focus:bg-white transition-all shadow-inner text-sm sm:text-base"
+                            placeholder="Search...">
+                    </div>
+                </div>
+            </nav>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+                <app-main [searchterm]="getSearch()" [category]="getcategory()" [currentUser]="this.currentUser"
+                    class="block w-full">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
+                        <div class="h-64 rounded-2xl bg-brand-light/40"></div>
+                        <div class="h-96 rounded-2xl bg-brand-medium/30"></div>
+                        <div class="h-72 rounded-2xl bg-brand-dark/20"></div>
+                        <div class="h-80 rounded-2xl bg-white shadow-sm border border-brand-light"></div>
+                        <div class="h-60 rounded-2xl bg-brand-medium/30"></div>
+                        <div class="h-80 rounded-2xl bg-brand-light/40"></div>
+                    </div>
+                </app-main>
+            </div>
         </div>
 
-        <div class="perfil" *ngIf="currentScreen === 'perfil'">
-            <main class="flex-grow p-8 flex items-center justify-center">
-                <div class="max-w-5xl w-full" *ngIf="currentUser">
+        <div class="perfil flex-1 flex flex-col h-full overflow-y-auto relative" *ngIf="currentScreen === 'perfil'">
 
-                    <section class="flex flex-col md:flex-row items-center gap-8 mb-10">
+            <button (click)="isSidebarOpen = !isSidebarOpen"
+                class="md:hidden absolute top-4 left-4 z-30 p-2 bg-white/80 backdrop-blur text-brand-dark shadow-sm hover:bg-white rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
+            <main class="flex-grow p-4 md:p-8 flex items-center justify-center min-h-full">
+                <div class="max-w-5xl w-full pt-8 md:pt-0" *ngIf="currentUser">
+
+                    <section class="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-10">
                         <div class="flex-grow text-center md:text-left">
-                            <h1 class="text-4xl font-black text-gray-800 tracking-tight">{{ currentUser.displayName }}
+                            <h1 class="text-2xl md:text-4xl font-black text-gray-800 tracking-tight">
+                                {{ currentUser.displayName }}
                             </h1>
-                            <p class="text-brand-dark font-medium mt-1">Activo desde el 2025</p>
+                            <p class="text-brand-dark font-medium mt-1 text-sm md:text-base">Activo desde el 2025</p>
                             <button
                                 class="mt-4 text-xs font-bold text-brand-medium border-2 border-brand-medium px-6 py-2 rounded-full hover:bg-brand-medium hover:text-white transition-all shadow-sm">
                                 EDITAR MI HUELLA
                             </button>
                         </div>
 
-                        <div class="w-64 bg-white p-5 rounded-3xl shadow-sm border border-brand-light/30">
+                        <div class="w-full md:w-64 bg-white p-5 rounded-3xl shadow-sm border border-brand-light/30">
                             <div class="flex justify-between items-end mb-2">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nivel de
                                     Impacto</span>
@@ -90,9 +122,9 @@
                         </div>
                     </section>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
                         <div
-                            class="bg-white p-8 rounded-[40px] shadow-sm border border-gray-50 flex flex-col justify-between hover:shadow-md transition-shadow">
+                            class="bg-white p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-sm border border-gray-50 flex flex-col justify-between hover:shadow-md transition-shadow">
                             <div>
                                 <h3
                                     class="font-bold mb-6 text-brand-dark uppercase tracking-widest text-[11px] flex items-center gap-2">
@@ -103,14 +135,14 @@
                                         <div class="bg-brand-cream p-2 rounded-lg">
                                             <i data-lucide="phone" class="w-4 h-4 text-brand-medium"></i>
                                         </div>
-                                        <span class="text-sm font-medium">{{ currentUser.phone || 'Sin teléfono'
-                                            }}</span>
+                                        <span class="text-sm font-medium break-all">{{ currentUser.phone || 'Sin
+                                            teléfono' }}</span>
                                     </div>
                                     <div class="flex items-center gap-4 text-gray-600">
                                         <div class="bg-brand-cream p-2 rounded-lg">
                                             <i data-lucide="mail" class="w-4 h-4 text-brand-medium"></i>
                                         </div>
-                                        <span class="text-sm font-medium">{{ currentUser.email }}</span>
+                                        <span class="text-sm font-medium break-all">{{ currentUser.email }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -119,81 +151,74 @@
                                 </h4>
                                 <p class="text-xs text-gray-500 leading-relaxed italic">
                                     "Me apasiona colaborar en albergues de animales y asilos. Siempre busco un espacio
-                                    para
-                                    sumar mis manos."
+                                    para sumar mis manos."
                                 </p>
                             </div>
                         </div>
 
                         <div
-                            class="bg-white p-8 rounded-[40px] shadow-sm border border-gray-50 flex flex-col items-center">
-                            <h3 class="font-bold mb-8 text-brand-dark uppercase tracking-widest text-[11px]">Insignias
-                                Obtenidas
+                            class="bg-white p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-sm border border-gray-50 flex flex-col items-center">
+                            <h3 class="font-bold mb-8 text-brand-dark uppercase tracking-widest text-[11px]">
+                                Insignias Obtenidas
                             </h3>
 
-                            <div class="grid grid-cols-3 gap-6 w-full">
+                            <div class="grid grid-cols-3 gap-2 sm:gap-6 w-full">
                                 <div class="flex flex-col items-center gap-2 group">
                                     <div
-                                        class="relative flex items-center justify-center w-16 h-16 bg-brand-cream rounded-full border-2 border-brand-medium shadow-lg shadow-brand-medium/20 text-brand-medium">
-                                        <i data-lucide="award" class="w-7 h-7"></i>
+                                        class="relative flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-brand-cream rounded-full border-2 border-brand-medium shadow-lg shadow-brand-medium/20 text-brand-medium">
+                                        <i data-lucide="award" class="w-5 h-5 md:w-7 md:h-7"></i>
                                         <div
-                                            class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full">
+                                            class="absolute -top-1 -right-1 w-3 h-3 md:w-4 md:h-4 bg-green-500 border-2 border-white rounded-full">
                                         </div>
                                     </div>
                                     <span
-                                        class="text-[9px] font-bold text-brand-dark uppercase tracking-tighter">Novato</span>
+                                        class="text-[8px] md:text-[9px] font-bold text-brand-dark uppercase tracking-tighter">Novato</span>
                                 </div>
 
                                 <div class="flex flex-col items-center gap-2 group"
                                     [class.opacity-40]="currentUser.favorites.length < 1">
-                                    <div class="relative flex items-center justify-center w-16 h-16 rounded-full border-2 transition-all duration-500"
+                                    <div class="relative flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full border-2 transition-all duration-500"
                                         [ngClass]="currentUser.favorites.length >= 1 ? 'bg-brand-cream border-brand-medium shadow-lg shadow-brand-medium/20 text-brand-medium' : 'bg-gray-50 border-gray-200 text-gray-300'">
-                                        <i data-lucide="heart" class="w-7 h-7"></i>
-                                        <div *ngIf="currentUser.favorites.length >= 1"
-                                            class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full">
-                                        </div>
+                                        <i data-lucide="heart" class="w-5 h-5 md:w-7 md:h-7"></i>
                                     </div>
-                                    <span class="text-[9px] font-bold uppercase tracking-tighter"
+                                    <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-tighter"
                                         [class.text-brand-dark]="currentUser.favorites.length >= 1">Activo</span>
                                 </div>
 
                                 <div class="flex flex-col items-center gap-2 group"
                                     [class.opacity-40]="currentUser.favorites.length < 5">
-                                    <div class="relative flex items-center justify-center w-16 h-16 rounded-full border-2 transition-all duration-500"
+                                    <div class="relative flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full border-2 transition-all duration-500"
                                         [ngClass]="currentUser.favorites.length >= 5 ? 'bg-brand-cream border-brand-medium shadow-lg shadow-brand-medium/20 text-brand-medium' : 'bg-gray-50 border-gray-200 text-gray-300'">
-                                        <i data-lucide="zap" class="w-7 h-7"></i>
-                                        <div *ngIf="currentUser.favorites.length >= 5"
-                                            class="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full">
-                                        </div>
+                                        <i data-lucide="zap" class="w-5 h-5 md:w-7 md:h-7"></i>
                                     </div>
-                                    <span class="text-[9px] font-bold uppercase tracking-tighter"
+                                    <span class="text-[8px] md:text-[9px] font-bold uppercase tracking-tighter"
                                         [class.text-brand-dark]="currentUser.favorites.length >= 5">Héroe</span>
                                 </div>
                             </div>
 
-                            <p class="mt-8 text-[10px] text-gray-400 font-medium">
+                            <p class="mt-8 text-[10px] text-gray-400 font-medium text-center">
                                 {{ currentUser.favorites.length < 5 ? '¡Guarda ' + (5 - currentUser.favorites.length)
                                     + ' más para ser Héroe!' : '¡Eres un Héroe de la comunidad!' }} </p>
                         </div>
                     </div>
 
                     <section
-                        class="bg-brand-cream p-10 rounded-[45px] border-b-8 border-brand-light shadow-inner relative overflow-hidden">
-                        <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                        class="bg-brand-cream p-6 md:p-10 rounded-[30px] md:rounded-[45px] border-b-8 border-brand-light shadow-inner relative overflow-hidden">
+                        <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
                             <div class="flex-grow text-center md:text-left">
-                                <h2 class="text-2xl font-black text-brand-dark mb-2">Tu Impacto en YoMeSumo</h2>
+                                <h2 class="text-xl md:text-2xl font-black text-brand-dark mb-2">Tu Impacto en YoMeSumo
+                                </h2>
                                 <p class="text-sm text-gray-600 leading-relaxed max-w-2xl">
                                     ¡Has hecho un trabajo fenomenal! Tienes <span
-                                        class="font-bold text-brand-medium text-lg">{{
-                                        currentUser.favorites.length }}</span>
-                                    publicaciones guardadas que te importan. Cada interés es el inicio de una gran suma.
+                                        class="font-bold text-brand-medium text-lg">{{ currentUser.favorites.length
+                                        }}</span>
+                                    publicaciones guardadas que te importan.
                                 </p>
                             </div>
                             <div
                                 class="bg-white px-8 py-5 rounded-[30px] text-center border-2 border-brand-light flex-shrink-0 shadow-sm">
                                 <span class="block text-4xl font-black text-brand-medium">{{
-                                    currentUser.favorites.length
-                                    }}</span>
+                                    currentUser.favorites.length }}</span>
                                 <span
                                     class="text-[10px] font-black uppercase text-brand-dark tracking-[0.2em]">Favoritos</span>
                             </div>
@@ -206,62 +231,70 @@
             </main>
         </div>
 
-        <div class="favoritos" *ngIf="this.currentScreen == 'favoritos'">
-            <main class="flex-1 flex flex-col min-w-0 relative">
-            
-                <nav
-                    class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 md:px-6 flex items-center gap-4 shadow-sm md:shadow-none">
-            
-                    <div class="relative shrink-0">
+        <div class="favoritos flex-1 flex flex-col h-full min-w-0 overflow-hidden"
+            *ngIf="this.currentScreen == 'favoritos'">
+
+            <nav
+                class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm">
+
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button (click)="isSidebarOpen = !isSidebarOpen"
+                        class="md:hidden p-2 text-brand-dark hover:bg-black/5 rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+
+                    <div class="relative shrink-0 flex-1 sm:flex-none">
                         <select (change)="setcategory($event)"
-                            class="appearance-none bg-transparent font-semibold text-brand-dark py-2 pl-3 pr-8 rounded-full hover:bg-black/5 cursor-pointer focus:outline-none transition-colors">
+                            class="w-full sm:w-auto appearance-none bg-transparent font-semibold text-brand-dark py-2 pl-3 pr-8 rounded-full hover:bg-black/5 cursor-pointer focus:outline-none transition-colors">
                             <option value="publicaciones">Publicaciones</option>
                             <option value="asociaciones">Asociaciones</option>
                         </select>
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-brand-dark">
+                        <div
+                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-brand-dark">
                             <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                 <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                             </svg>
                         </div>
                     </div>
-            
-                    <div class="flex-1 max-w-4xl mx-auto">
-                        <div class="relative group">
-                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <svg class="h-5 w-5 text-brand-dark/70 group-focus-within:text-brand-dark" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </div>
-                            <input (input)="filterSearch($event)" type="text"
-                                class="block w-full bg-brand-light/30 text-gray-900 rounded-full py-3 pl-12 pr-4 placeholder-brand-dark/70 focus:outline-none focus:ring-2 focus:ring-brand-medium/50 focus:bg-white transition-all shadow-inner"
-                                placeholder="Search...">
-                        </div>
-                    </div>
-        
-                </nav>
-            
-            
-                <div class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6">
-                    <app-main [favDelimitation]='true' [searchterm]="getSearch()" [category]="getcategory()" [currentUser]="this.currentUser" class="block w-full h-full">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pb-20">
-                            <div class="h-64 rounded-2xl bg-brand-light/40"></div>
-                            <div class="h-96 rounded-2xl bg-brand-medium/30"></div>
-                            <div class="h-72 rounded-2xl bg-brand-dark/20"></div>
-                            <div class="h-80 rounded-2xl bg-white shadow-sm border border-brand-light"></div>
-                            <div class="h-60 rounded-2xl bg-brand-medium/30"></div>
-                            <div class="h-80 rounded-2xl bg-brand-light/40"></div>
-                        </div>
-                    </app-main>
                 </div>
-            
-            </main>
+
+                <div class="flex-1 w-full max-w-4xl mx-auto">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-brand-dark/70 group-focus-within:text-brand-dark" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <input (input)="filterSearch($event)" type="text"
+                            class="block w-full bg-brand-light/30 text-gray-900 rounded-full py-2 sm:py-3 pl-12 pr-4 placeholder-brand-dark/70 focus:outline-none focus:ring-2 focus:ring-brand-medium/50 focus:bg-white transition-all shadow-inner text-sm sm:text-base"
+                            placeholder="Search...">
+                    </div>
+                </div>
+            </nav>
+
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+                <app-main [favDelimitation]='true' [searchterm]="getSearch()" [category]="getcategory()"
+                    [currentUser]="this.currentUser" class="block w-full">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
+                        <div class="h-64 rounded-2xl bg-brand-light/40"></div>
+                        <div class="h-96 rounded-2xl bg-brand-medium/30"></div>
+                        <div class="h-72 rounded-2xl bg-brand-dark/20"></div>
+                        <div class="h-80 rounded-2xl bg-white shadow-sm border border-brand-light"></div>
+                        <div class="h-60 rounded-2xl bg-brand-medium/30"></div>
+                        <div class="h-80 rounded-2xl bg-brand-light/40"></div>
+                    </div>
+                </app-main>
+            </div>
         </div>
 
         <div class="contador" *ngIf="this.currentScreen == 'contador'">
             in contador
         </div>
     </div>
-
 </div>

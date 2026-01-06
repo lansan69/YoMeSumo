@@ -29,7 +29,7 @@ export class Ayudante implements OnInit {
   private searchTerm: string = "";
   private searchCategory: string = "publicaciones";
   public showLogin = false;
-
+  isSidebarOpen: boolean = false;
   //perfil, llamados, favoritos, contador
   currentScreen = "llamados";
   currentUser: User | undefined = undefined;
