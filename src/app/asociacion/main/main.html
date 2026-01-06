@@ -1,0 +1,199 @@
+<div *ngIf="this.category == 'publicaciones'"
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6 w-full p-4 pb-20">
+
+    <div *ngFor="let post of posts$ | async"
+        class="w-full bg-white rounded-2xl shadow-[4px_4px_12px_-3px] shadow-brand-dark/15 hover:shadow-[6px_6px_20px_-2px] hover:shadow-brand-medium/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col font-sans group border border-gray-100">
+
+        <a [href]="'https://www.google.com/maps/search/?api=1&query=' + post.location.lat + ',' + post.location.lng"
+            target="_blank" class="block relative h-32 bg-gray-100 overflow-hidden group shrink-0">
+            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                alt="Map Pattern"
+                class="w-full h-full object-cover opacity-80 mix-blend-multiply filter grayscale-[30%] transition-transform duration-700 group-hover:scale-110">
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/10 to-transparent pointer-events-none"></div>
+            <div class="absolute inset-0 opacity-[0.1] pointer-events-none"
+                style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 10px 10px;"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full drop-shadow-xl">
+                <span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                <div class="relative transition-all duration-300 group-hover:-translate-y-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-8 h-8 text-red-500 drop-shadow-sm">
+                        <path fill-rule="evenodd"
+                            d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <div
+                        class="w-2 h-1 bg-black/30 rounded-[100%] absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 blur-[1px]">
+                    </div>
+                </div>
+            </div>
+        </a>
+
+        <div class="p-4 flex flex-col items-center text-center flex-grow">
+            <span
+                class="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3 shadow-sm border border-transparent"
+                [ngClass]="post.type === 'request' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-brand-medium/10 text-brand-dark border-brand-medium/20'">
+                {{ post.type }}
+            </span>
+            <h3 class="text-lg font-bold text-brand-dark mb-1 leading-tight line-clamp-2 min-h-[1.5rem]">
+                {{ post.title }}
+            </h3>
+            <p class="text-brand-dark text-xs mb-4 px-1 opacity-80 line-clamp-2 h-8">
+                {{ post.description }}
+            </p>
+            <div class="w-full mb-5">
+                <div *ngIf="post.suppliesList && post.suppliesList.length > 0" class="grid grid-cols-3 gap-2 w-full">
+                    <div *ngFor="let item of post.suppliesList.slice(0, 6)"
+                        class="bg-brand-light/20 text-brand-dark/80 text-[10px] font-medium py-1.5 px-1 rounded-md border border-brand-dark/5 truncate text-center"
+                        title="{{item}}">
+                        {{ item }}
+                    </div>
+                </div>
+                <div *ngIf="!post.suppliesList || post.suppliesList.length === 0"
+                    class="h-16 flex items-center justify-center border border-dashed border-gray-200 rounded-lg bg-gray-50/50">
+                    <p class="text-gray-400 italic text-[10px]">Sin lista de insumos</p>
+                </div>
+            </div>
+            <div
+                class="w-full flex items-center gap-2 mt-auto pt-3 border-t border-brand-light/30 cursor-pointer group/author">
+                <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-medium to-brand-dark flex-shrink-0 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                    {{ post.authorName.charAt(0) }}
+                </div>
+                <div class="text-left">
+                    <p
+                        class="text-brand-dark font-bold leading-none text-sm group-hover/author:text-brand-medium transition-colors">
+                        {{ post.authorName }}
+                    </p>
+                    <p class="text-brand-dark/50 text-[10px] font-medium mt-0.5">
+                        {{ post.createdAt?.toDate() | date:'MMM d, y' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-brand-dark text-white flex text-xs font-medium divide-x divide-white/20">
+            <button
+                class="flex-1 flex flex-col items-center gap-1 hover:bg-black/10 transition-colors transition py-2 cursor-pointer group/btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Ver</span>
+            </button>
+            <button
+                class="flex-1 flex flex-col items-center gap-1 hover:bg-black/10 transition-colors transition py-2 cursor-pointer group/btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M10.05 4.575a1.575 1.575 0 10-3.15 0v3m3.15-3v-1.5a1.575 1.575 0 013.15 0v1.5m-3.15 0l.075 5.925m3.075.75V4.575m0 0a1.575 1.575 0 013.15 0V15M6.9 7.575a1.575 1.575 0 10-3.15 0v8.175a6.75 6.75 0 006.75 6.75h2.018a5.25 5.25 0 003.712-1.538l1.732-1.732a5.25 5.25 0 001.538-3.712l.003-2.024a.668.668 0 01.198-.471 1.575 1.575 0 10-2.228-2.228 3.818 3.818 0 00-1.12 2.687M6.9 7.575V12m6.27 4.318A4.49 4.49 0 0116.35 15m.002 0h-.002" />
+                </svg>
+                <span>Sumarse</span>
+            </button>
+            <button
+                class="flex-1 flex flex-col items-center gap-1 hover:bg-black/10 transition-colors transition py-2 cursor-pointer group/btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.385a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                </svg>
+                <span>Favoritos</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="category === 'asociaciones'"
+    class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-6 w-full p-4 pb-20">
+
+    <div *ngFor="let aso of asoc$ | async"
+        class="w-full bg-white rounded-2xl shadow-[4px_4px_12px_-3px] shadow-brand-dark/15 hover:shadow-[6px_6px_20px_-2px] hover:shadow-brand-medium/20 hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col font-sans group border border-gray-100 h-full">
+
+        <div class="relative h-32 overflow-hidden group cursor-pointer shrink-0">
+            <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+                alt="Map Pattern"
+                class="w-full h-full object-cover opacity-80 mix-blend-multiply filter grayscale-[30%] transition-transform duration-700 group-hover:scale-110">
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/10 to-transparent pointer-events-none"></div>
+            <div class="absolute inset-0 opacity-[0.1] pointer-events-none"
+                style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 10px 10px;"></div>
+
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full drop-shadow-xl">
+                <span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                <div class="relative transition-all duration-300 group-hover:-translate-y-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="w-8 h-8 text-red-500 drop-shadow-sm">
+                        <path fill-rule="evenodd"
+                            d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <div
+                        class="w-2 h-1 bg-black/30 rounded-[100%] absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 blur-[1px]">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 flex flex-col items-center text-center flex-grow">
+
+            <span
+                class="inline-block text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-3 shadow-sm bg-red-50 text-red-600 border border-red-100">
+                {{ aso.categoria || 'Asociación' }}
+            </span>
+
+            <h3 class="text-lg font-bold text-brand-dark mb-1 leading-tight line-clamp-2 min-h-[1.5rem]">
+                {{ aso.nameAssociation }}
+            </h3>
+
+            <p class="text-brand-dark text-xs mb-4 px-1 opacity-80 line-clamp-3 h-12">
+                {{ aso.description }}
+            </p>
+
+            <div class="flex-grow"></div>
+
+            <div
+                class="w-full flex items-center gap-2 mt-auto pt-3 border-t border-brand-light/30 cursor-pointer group/author">
+                <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-medium to-brand-dark shadow-md flex items-center justify-center flex-shrink-0">
+                    <span class="text-white text-xs font-bold uppercase tracking-tighter">
+                        {{ aso.nameAssociation?.charAt(0) }}
+                    </span>
+                </div>
+
+                <div class="text-left overflow-hidden">
+                    <p
+                        class="text-brand-dark font-bold leading-none text-sm group-hover/author:text-brand-medium transition-colors truncate">
+                        {{ aso.encargado || 'Encargado' }}
+                    </p>
+                    <p class="text-brand-dark/50 text-[10px] font-medium mt-0.5 truncate">
+                        {{ aso.phone || 'Sin teléfono' }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-brand-dark text-white flex text-xs font-medium divide-x divide-white/20">
+            <button
+                class="flex-1 flex flex-col items-center gap-1 hover:bg-black/10 transition-colors transition py-2 cursor-pointer group/btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Perfil</span>
+            </button>
+
+            <button
+                class="flex-1 flex flex-col items-center gap-1 hover:bg-black/10 transition-colors transition py-2 cursor-pointer group/btn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.385a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                </svg>
+                <span>Favoritos</span>
+            </button>
+        </div>
+
+    </div>
+</div>

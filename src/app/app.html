@@ -1,10 +1,10 @@
 <div [ngSwitch]="userStatus">
 
-  <app-unlogged *ngSwitchCase="'unlogged'"></app-unlogged>
+  <app-unlogged *ngSwitchCase="'unlogged'" (category)="setUserstatus($event)"></app-unlogged>
 
-  <app-asociacion *ngSwitchCase="'asociacion'"></app-asociacion>
+  <app-asociacion *ngSwitchCase="'asociacion'" (logout)="logOut()" ></app-asociacion>
 
-  <app-ayudante *ngSwitchCase="'ayudante'"></app-ayudante>
+  <app-ayudante *ngSwitchCase="'usuario'" (logout)="logOut()" ></app-ayudante>
 
   <p *ngSwitchDefault>Please log in to continue.</p>
 

@@ -87,5 +87,5 @@
 </div>
 
 @if (showLogin) {
-<app-login (close)="setModalLoginFalse()"></app-login>
+<app-login (close)="setModalLoginFalse()" (categoryLogged)="setLoggedPage($event)"></app-login>
 }

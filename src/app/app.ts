@@ -12,11 +12,19 @@ import { CommonModule } from '@angular/common'; // 1. Import this
   styleUrl: './app.css'
 })
 export class App {
-  // Options: 'unlogged', 'asociacion', 'ayudante'
-  userStatus: string = 'unlogged';
+  // Options: 'unlogged', 'asociacion', 'usuario'
+  userStatus: string = 'asociacion';
 
   // Simple function to switch views for testing
   setView(status: string) {
     this.userStatus = status;
+  }
+
+  setUserstatus(event:string){
+    this.userStatus = event;
+  }
+
+  logOut(){
+    this.userStatus = "unlogged";
   }
 }

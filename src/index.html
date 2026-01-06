@@ -1,13 +1,56 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <title>YoMeSumo</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <style type="text/tailwindcss">
+    @theme {
+      /* Your Custom Palette */
+      --color-brand-cream: #FEF5ED;
+      --color-brand-light: #D3E4CD;
+      --color-brand-medium: #ADC2A9;
+      --color-brand-dark: #99A799;
+
+      /* Semantic Mapping (Optional but recommended) */
+      --color-background: var(--color-brand-cream);
+      --color-primary: var(--color-brand-medium);
+      --color-secondary: var(--color-brand-light);
+      --color-accent: var(--color-brand-dark);
+    }
+  </style>
 </head>
-<body>
+
+<body class="bg-background text-accent">
   <app-root></app-root>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            cream: '#FEF5ED',
+            light: '#D3E4CD',
+            medium: '#ADC2A9',
+            dark: '#99A799',
+            danger: '#D67D7D',
+            dangerHover: '#B24C4C'
+          }
+        },
+        fontFamily: {
+          sans: ['"Segoe UI"', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAPdX6q4NTL5vbro3DPEMVJocsn9Gp1OiM&libraries=places">
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
 </html>

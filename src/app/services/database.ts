@@ -17,6 +17,7 @@ import {
   increment // <--- Added this for applicantsCount
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Post, User, Association, PostApplicant } from '../models/post.model';
 
 @Injectable({
@@ -40,6 +41,27 @@ export class DatabaseService {
   getUserById(uid: string): Observable<User | undefined> {
     const userRef = doc(this.firestore, `users/${uid}`);
     return docData(userRef, { idField: 'uid' }) as Observable<User>;
+  }
+
+  getUserByEmail(email: string): Observable<User | undefined> {
+    const usersRef = collection(this.firestore, 'users');
+    const q = query(usersRef, where('email', '==', email));
+
+    // collectionData returns an array. We map to get the first result.
+    return collectionData(q, { idField: 'uid' }).pipe(
+      map((users: any[]) => users.length > 0 ? (users[0] as User) : undefined)
+    );
+  }
+
+
+  // 3. Get by Phone - This requires a Query
+  getUserByPhone(phone: string): Observable<User | undefined> {
+    const usersRef = collection(this.firestore, 'users');
+    const q = query(usersRef, where('phone', '==', phone));
+
+    return collectionData(q, { idField: 'uid' }).pipe(
+      map((users: any[]) => users.length > 0 ? (users[0] as User) : undefined)
+    );
   }
 
   async updateUser(uid: string, data: Partial<User>) {
@@ -143,14 +165,21 @@ export class DatabaseService {
     return collectionData(applicantsRef, { idField: 'uid' }) as Observable<PostApplicant[]>;
   }
 
-  async updateApplicantStatus(postId: string, applicantId: string, status: 'accepted' | 'rejected') {
-    const applicantRef = doc(this.firestore, `posts/${postId}/applicants/${applicantId}`);
+  updateApplicantStatus(applicantId: string, status: 'accepted' | 'rejected' | 'completed') {
+    // We target the 'applicants' collection because that is where we read the data from
+    const applicantRef = doc(this.firestore, `applicants/${applicantId}`);
     return updateDoc(applicantRef, { status });
   }
 
   getApplicationStatus(postId: string, userId: string): Observable<PostApplicant | undefined> {
     const applicantRef = doc(this.firestore, `posts/${postId}/applicants/${userId}`);
     return docData(applicantRef) as Observable<PostApplicant>;
+  }
+
+  getApplicantsByPostId(postId: string): Observable<PostApplicant[]> {
+    const applicantsRef = collection(this.firestore, 'applicants');
+    const q = query(applicantsRef, where('postId', '==', postId));
+    return collectionData(q, { idField: 'applicantId' }) as Observable<PostApplicant[]>;
   }
 
   // =================================================================

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { Aside } from './aside/aside';
 import { Main } from './main/main';
 import { Login } from "./login/login";
@@ -13,6 +13,7 @@ export class Unlogged {
   private searchTerm:string = "";
   private searchCategory:string = "publicaciones";
   public showLogin = false;
+  @Output() category = new EventEmitter<string>();
 
   filterSearch(event: Event){
     const query = (event.target as HTMLInputElement).value.toLowerCase();
@@ -41,5 +42,9 @@ export class Unlogged {
     this.showLogin = false;
   }
 
+  setLoggedPage(event: string){
+    console.log("new category from users", event)
+    this.category.emit(event);
+  }
   
 }

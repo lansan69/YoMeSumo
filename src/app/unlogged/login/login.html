@@ -11,35 +11,120 @@
     <div
         class="relative bg-brand-cream rounded-[2rem] shadow-2xl w-full max-w-[850px] min-h-[550px] overflow-hidden flex flex-col md:block">
 
-        <div class="absolute top-0 h-full transition-all duration-700 ease-in-out flex flex-col justify-center items-center px-10 md:w-1/2 w-full"
+        <div class="absolute top-0 h-full w-full md:w-1/2 transition-all duration-700 ease-in-out flex flex-col justify-center items-center"
             [class.translate-x-full]="isSignUpActive" [class.opacity-100]="isSignUpActive"
             [class.opacity-0]="!isSignUpActive" [class.z-50]="isSignUpActive" [class.z-10]="!isSignUpActive"
             [class.invisible]="!isSignUpActive" [class.md:visible]="true">
-            <form class="w-full flex flex-col items-center bg-brand-cream md:bg-transparent h-full justify-center">
-                <h1 class="font-bold text-3xl text-brand-dark mb-4">Crear Cuenta</h1>
 
-                <div class="flex gap-4 mb-4">
-                    <button type="button"
-                        class="w-10 h-10 rounded-full border border-brand-dark/30 flex items-center justify-center text-brand-dark hover:bg-brand-light/50 transition">G</button>
-                    <button type="button"
-                        class="w-10 h-10 rounded-full border border-brand-dark/30 flex items-center justify-center text-brand-dark hover:bg-brand-light/50 transition">F</button>
+            <form (ngSubmit)="onRegister()"
+                class="w-full h-full flex flex-col items-center bg-brand-cream md:bg-transparent px-10 py-8 overflow-y-auto custom-scrollbar">
+
+                <h1 class="font-bold text-3xl text-brand-dark mb-4 shrink-0">Crear Cuenta</h1>
+
+                <div class="flex gap-6 mb-4 shrink-0">
+                    <label class="flex items-center cursor-pointer gap-2 group">
+                        <input type="radio" name="regType" [checked]="registerType === 'usuario'"
+                            (change)="setRegisterType('usuario')" class="hidden peer">
+                        <div
+                            class="w-4 h-4 border-2 border-brand-dark rounded-full peer-checked:bg-brand-dark flex items-center justify-center">
+                            <div class="w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+                        </div>
+                        <span
+                            class="text-sm font-bold text-gray-500 peer-checked:text-brand-dark transition-colors">Usuario</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer gap-2 group">
+                        <input type="radio" name="regType" [checked]="registerType === 'asociacion'"
+                            (change)="setRegisterType('asociacion')" class="hidden peer">
+                        <div
+                            class="w-4 h-4 border-2 border-brand-dark rounded-full peer-checked:bg-brand-dark flex items-center justify-center">
+                            <div class="w-1.5 h-1.5 bg-white rounded-full opacity-0 peer-checked:opacity-100"></div>
+                        </div>
+                        <span
+                            class="text-sm font-bold text-gray-500 peer-checked:text-brand-dark transition-colors">Asociación</span>
+                    </label>
                 </div>
 
-                <span class="text-xs text-gray-500 mb-4">o usa tu email para registrarte</span>
+                <div class="w-full flex flex-col gap-3">
 
-                <input type="text" placeholder="Nombre"
-                    class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-3 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
-                <input type="email" placeholder="Email"
-                    class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-3 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
-                <input type="password" placeholder="Contraseña"
-                    class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-6 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                    <ng-container *ngIf="registerType === 'usuario'">
+                        <input type="text" placeholder="Nombre" name="regName" [(ngModel)]="regName"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
 
-                <button
-                    class="bg-brand-dark text-white text-xs font-bold uppercase py-3 px-10 rounded-full tracking-wider hover:bg-brand-medium hover:shadow-lg transition-all transform active:scale-95">
+                        <input type="tel" placeholder="Teléfono" name="regPhone" [(ngModel)]="regPhone"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                        <input type="email" placeholder="Email" name="regEmail" [(ngModel)]="regEmail"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                        <input type="password" placeholder="Contraseña" name="regPass" [(ngModel)]="regPass"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                    </ng-container>
+
+                    <ng-container *ngIf="registerType === 'asociacion'">
+
+                        <input type="text" placeholder="Nombre asociación" name="assocName" [(ngModel)]="assocName"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                        <input type="text" placeholder="Nombre persona encargada" name="assocEncargado"
+                            [(ngModel)]="assocEncargado"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                        <div class="relative w-full">
+                            <select name="assocCategory" [(ngModel)]="assocCategory"
+                                class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 appearance-none focus:outline-none focus:ring-2 focus:ring-brand-medium font-sans cursor-pointer">
+                                <option value="" disabled selected>Categoría</option>
+                                <option value="albergue">Albergue</option>
+                                <option value="orfanato">Orfanato</option>
+                                <option value="asilo">Asilo</option>
+                                <option value="animales">Animales</option>
+                                <option value="otra">Otra</option>
+                            </select>
+                            <div
+                                class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <textarea placeholder="Descripción (About us)" name="assocDescription"
+                            [(ngModel)]="assocDescription" rows="3"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans resize-none"></textarea>
+
+                        <div class="w-full">
+                            <input #addressInput type="text" placeholder="Dirección (Buscar ubicación...)"
+                                class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                            <p *ngIf="selectedLocation.lat !== 0"
+                                class="text-xs text-green-600 mt-1 ml-2 font-semibold">✓ Ubicación
+                                encontrada</p>
+                        </div>
+
+                        <input type="tel" placeholder="Teléfono" name="assocPhone" [(ngModel)]="assocPhone"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                        <input type="email" placeholder="Email" name="assocEmail" [(ngModel)]="assocEmail"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                        <input type="password" placeholder="Contraseña" name="assocPass" [(ngModel)]="assocPass"
+                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                    </ng-container>
+                </div>
+
+                <div class="h-6 mt-3 w-full text-center" *ngIf="regError">
+                    <p class="text-xs text-red-500 font-bold animate-pulse">
+                        {{ regError }}
+                    </p>
+                </div>
+
+                <button type="submit"
+                    class="mt-6 shrink-0 bg-brand-dark text-white text-xs font-bold uppercase py-3 px-10 rounded-full tracking-wider hover:bg-brand-medium hover:shadow-lg transition-all transform active:scale-95">
                     Registrarse
                 </button>
 
-                <p class="mt-6 text-xs text-brand-dark md:hidden cursor-pointer hover:underline"
+                <p class="mt-6 shrink-0 text-xs text-brand-dark md:hidden cursor-pointer hover:underline"
                     (click)="togglePanel()">
                     ¿Ya tienes cuenta? Inicia sesión aquí
                 </p>
@@ -50,28 +135,27 @@
             [class.opacity-100]="!isSignUpActive" [class.opacity-0]="isSignUpActive" [class.z-20]="!isSignUpActive"
             [class.z-10]="isSignUpActive" [class.invisible]="isSignUpActive" [class.md:visible]="true">
 
-            <form class="w-full flex flex-col items-center bg-brand-cream md:bg-transparent h-full justify-center">
-                <h1 class="font-bold text-3xl text-brand-dark mb-4">Iniciar Sesión</h1>
+            <form (ngSubmit)="onLogin()"
+                class="w-full flex flex-col items-center bg-brand-cream md:bg-transparent h-full justify-center">
+                <h1 class="font-bold text-3xl text-brand-dark mb-6">Iniciar Sesión</h1>
 
-                <div class="flex gap-4 mb-4">
-                    <button type="button"
-                        class="w-10 h-10 rounded-full border border-brand-dark/30 flex items-center justify-center text-brand-dark hover:bg-brand-light/50 transition">G</button>
-                    <button type="button"
-                        class="w-10 h-10 rounded-full border border-brand-dark/30 flex items-center justify-center text-brand-dark hover:bg-brand-light/50 transition">F</button>
-                </div>
-
-                <span class="text-xs text-gray-500 mb-4">o usa tu cuenta existente</span>
-
-                <input type="email" placeholder="Email"
+                <input type="email" placeholder="Email" name="loginEmail" [(ngModel)]="loginEmail"
                     class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-3 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
-                <input type="password" placeholder="Contraseña"
-                    class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                <input type="password" placeholder="Contraseña" name="loginPass" [(ngModel)]="loginPass"
+                    class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-1 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+
+                <div class="h-6 mb-3 w-full text-center">
+                    <p *ngIf="loginError" class="text-xs text-red-500 font-bold animate-pulse">
+                        Usuario o contraseña incorrecta
+                    </p>
+                </div>
 
                 <a href="#"
                     class="text-xs text-gray-500 mb-6 hover:text-brand-dark border-b border-transparent hover:border-brand-dark transition-colors">¿Olvidaste
                     tu contraseña?</a>
 
-                <button
+                <button type="submit"
                     class="bg-brand-dark text-white text-xs font-bold uppercase py-3 px-10 rounded-full tracking-wider hover:bg-brand-medium hover:shadow-lg transition-all transform active:scale-95">
                     Entrar
                 </button>

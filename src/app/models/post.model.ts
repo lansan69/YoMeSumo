@@ -1,19 +1,3 @@
-export interface DaySchedule {
-    open: string;  // "09:00"
-    close: string; // "18:00"
-    isClosed?: boolean;
-}
-
-export interface WeeklySchedule {
-    lunes?: DaySchedule;
-    martes?: DaySchedule;
-    miercoles?: DaySchedule;
-    jueves?: DaySchedule;
-    viernes?: DaySchedule;
-    sabado?: DaySchedule;
-    domingo?: DaySchedule;
-}
-
 // 1. USER MODEL
 export interface User {
     uid: string;
@@ -29,7 +13,6 @@ export interface Association{
     encargado:string;
     nameAssociation:string;
     description:string;
-    schedule: WeeklySchedule;
     categoria:string;
     email: string;
     phone: string;
@@ -70,6 +53,6 @@ export interface PostApplicant {
     helperPhone: string;
     helperEmail: string;
     message: string;
-    status: 'pending' | 'accepted' | 'rejected';
+    status: 'pending' | 'accepted' | 'rejected' | 'completed';
     timestamp: any;
 }

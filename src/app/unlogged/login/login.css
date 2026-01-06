@@ -1,0 +1,14 @@
+/* src/styles.css */
+.pac-container {
+    z-index: 100000 !important;
+    /* Force it above everything */
+    font-family: 'Roboto', sans-serif;
+    /* Optional: Match your font */
+}
+
+/* Optional: Make the backdrop look better */
+.pac-item {
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}

@@ -1,0 +1,71 @@
+button{
+    cursor: pointer !important;
+}
+
+.eco-card {
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #f0f0f0;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Accordion Animation */
+.postulantes-content {
+    max-height: 0;
+    opacity: 0;
+    /* Start invisible */
+    overflow: hidden;
+    /* Always hidden, no scrollbars inside cards */
+    transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+    background-color: rgba(249, 250, 251, 0.5);
+}
+
+.eco-card.open .postulantes-content {
+    max-height: 1500px;
+    /* Large enough to fit content */
+    opacity: 1;
+    /* Fade in */
+    padding-bottom: 20px;
+}
+
+.chevron {
+    transition: transform 0.3s ease;
+}
+
+.eco-card.open .chevron {
+    transform: rotate(180deg);
+}
+
+.ws-chip {
+    background-color: var(--brand-light);
+    color: #5b635b;
+    padding: 4px 12px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+}
+
+.btn-action {
+    padding: 6px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    transition: opacity 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.pac-container {
+    z-index: 10000 !important;
+    /* Value higher than Tailwind's z-50 */
+    border-radius: 1rem;
+    margin-top: 5px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
+}

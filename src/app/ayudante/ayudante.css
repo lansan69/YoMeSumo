@@ -1,0 +1,112 @@
+:root {
+        --cream: #FEF5ED;
+        --light: #D3E4CD;
+        --medium: #ADC2A9;
+        --dark: #99A799;
+    }
+
+    body {
+        background-color: var(--cream);
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    /* --- BLOQUE DEL MENÚ (COPIAR DESDE AQUÍ PARA EL COMPAÑERO) --- */
+    .yomesumo-sidebar {
+        width: 280px;
+        background-color: white;
+        border-right: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        padding: 30px 20px;
+        height: 100vh;
+    }
+
+    .profile-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 40px;
+        padding-left: 10px;
+    }
+
+    /* Círculo dinámico: Imagen o Inicial */
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        background-color: var(--medium);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid var(--light);
+    }
+
+    .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .brand-name {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--dark);
+        letter-spacing: -0.5px;
+    }
+
+    .menu-nav {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .menu-link {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px 18px;
+        border-radius: 14px;
+        color: var(--dark);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .menu-link:hover {
+        background-color: var(--light);
+        transform: translateX(5px);
+    }
+
+    .menu-link i {
+        width: 20px;
+        height: 20px;
+        stroke-width: 2px;
+    }
+
+    .logout-btn {
+        margin-top: auto;
+        color: #D67D7D;
+        /* Color sutil para salida */
+    }
+
+    .logout-btn:hover {
+        background-color: #FFF0F0;
+        color: #B24C4C;
+    }
+
+    /* --- FIN DEL BLOQUE DEL MENÚ --- */
+
+    .main-content {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
