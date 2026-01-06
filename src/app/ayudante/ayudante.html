@@ -44,7 +44,7 @@
 
 
                 <div class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6">
-                    <app-main [searchterm]="getSearch()" [category]="getcategory()" class="block w-full h-full">
+                    <app-main [searchterm]="getSearch()" [category]="getcategory()" [currentUser]="this.currentUser" class="block w-full h-full">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pb-20">
                             <div class="h-64 rounded-2xl bg-brand-light/40"></div>
                             <div class="h-96 rounded-2xl bg-brand-medium/30"></div>
@@ -244,7 +244,7 @@
             
             
                 <div class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6">
-                    <app-main [favDelimitation]='true' [searchterm]="getSearch()" [category]="getcategory()" class="block w-full h-full">
+                    <app-main [favDelimitation]='true' [searchterm]="getSearch()" [category]="getcategory()" [currentUser]="this.currentUser" class="block w-full h-full">
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pb-20">
                             <div class="h-64 rounded-2xl bg-brand-light/40"></div>
                             <div class="h-96 rounded-2xl bg-brand-medium/30"></div>

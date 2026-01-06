@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, NgZone } from '@angular/core'; import { CommonModule } from '@angular/common';
+import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, NgZone, ViewEncapsulation } from '@angular/core'; import { CommonModule } from '@angular/common';
 import { Aside } from './aside/aside';
 import { Main } from './main/main';
 import { DatabaseService } from '../services/database';
@@ -14,6 +14,7 @@ declare var google: any;
   imports: [Aside, Main, CommonModule, FormsModule],
   templateUrl: './asociacion.html',
   styleUrl: './asociacion.css',
+  encapsulation: ViewEncapsulation.None
 })
 export class Asociacion implements OnInit {
   private dbService = inject(DatabaseService);
@@ -223,6 +224,7 @@ export class Asociacion implements OnInit {
 
       // Close Modal
       this.closeEcoModal();
+      this.refreshIcons();
 
       // Refresh view logic will trigger automatically via subscription
     } catch (error) {
@@ -288,23 +290,19 @@ export class Asociacion implements OnInit {
       }
     }
   }
-
   // 4. GOOGLE MAPS LOGIC
   initAutocomplete() {
-    // 1. Check if the Google Maps API is loaded
     if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
       console.warn("Google Maps API not loaded yet. Retrying in 500ms...");
       setTimeout(() => this.initAutocomplete(), 500);
       return;
     }
 
-    // 2. Check if the input element is available in the DOM
     if (!this.addressInput || !this.addressInput.nativeElement) {
       console.warn("Address Input not found in DOM.");
       return;
     }
 
-    // 3. Initialize
     const autocomplete = new google.maps.places.Autocomplete(this.addressInput.nativeElement, {
       componentRestrictions: { country: 'mx' },
       fields: ['geometry', 'formatted_address'],
@@ -314,7 +312,6 @@ export class Asociacion implements OnInit {
     autocomplete.addListener('place_changed', () => {
       this.ngZone.run(() => {
         const place = autocomplete.getPlace();
-
         if (!place.geometry || !place.geometry.location) {
           window.alert("No details available for input: '" + place.name + "'");
           return;
@@ -325,7 +322,6 @@ export class Asociacion implements OnInit {
           lat: place.geometry.location.lat(),
           lng: place.geometry.location.lng()
         };
-
         console.log("Location Selected:", this.selectedCoordinates);
       });
     });
@@ -335,13 +331,26 @@ export class Asociacion implements OnInit {
 
   openEcoModal() {
     this.showCreateModal = true;
-
-    // CRITICAL FIX: Initialize autocomplete ONLY when the modal is opening.
-    // We use a small timeout to allow Angular to render the Modal DOM (remove class.hidden)
-    // before Maps tries to attach to the input.
+    // Delay ensures modal DOM is rendered (removing 'hidden' class) before Maps attaches
     setTimeout(() => {
       this.initAutocomplete();
     }, 100);
+  }
+
+  async deletePost(postId: string) {
+    const confirmed = confirm("¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.");
+    if (!confirmed) return;
+
+    try {
+      await this.dbService.deletePost(postId);
+      this.myPosts = this.myPosts.filter(post => post.id !== postId);
+      delete this.postApplicants[postId];
+      this.openPostIds.delete(postId);
+      console.log('Post eliminated successfully');
+    } catch (error) {
+      console.error('Error eliminating post:', error);
+      alert('Hubo un error al intentar eliminar la publicación.');
+    }
   }
 
   closeEcoModal() { this.showCreateModal = false; }

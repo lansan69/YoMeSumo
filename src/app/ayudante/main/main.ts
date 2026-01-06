@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { Observable, BehaviorSubject, combineLatest, map } from 'rxjs'; // <--- Import these
+import { Component, inject, Input } from '@angular/core'; // Removed OnChanges, SimpleChanges
+import { Observable, BehaviorSubject, combineLatest, map } from 'rxjs';
 
 import { DatabaseService } from '../../services/database';
 import { Post, Association, User } from '../../models/post.model';
@@ -12,25 +12,85 @@ import { Post, Association, User } from '../../models/post.model';
   templateUrl: './main.html',
   styleUrl: './main.css',
 })
-export class Main implements OnChanges {
+export class Main {
   private dbService = inject(DatabaseService);
-  currentUser: User | undefined = undefined;
+  
+  // --- 1. Inputs converted to Setters for Reactivity ---
+  
+  // Backing field for currentUser so we can access it in toggleFavorite
+  private _currentUser: User | undefined;
+  
+  @Input() set currentUser(val: User | undefined) {
+    this._currentUser = val;
+    this.currentUser$.next(val); // <--- Updates pipeline immediately
+    console.log("Main Component received user:", val); 
+  }
+  get currentUser(): User | undefined {
+    return this._currentUser;
+  }
 
-  // 1. Receive the search term
-  @Input() favDelimitation: boolean = false;
-  @Input() searchterm: string = '';
+  @Input() set favDelimitation(val: boolean) {
+    this.favDelimitation$.next(val);
+  }
+
+  @Input() set searchterm(val: string) {
+    this.searchTerm$.next(val);
+  }
+
   @Input() category: string = '';
 
-  // 2. Create a "Subject" to track the search term reactively
+  // 2. Subjects
   private searchTerm$ = new BehaviorSubject<string>('');
   private favDelimitation$ = new BehaviorSubject<boolean>(false);
   private currentUser$ = new BehaviorSubject<User | undefined>(undefined);
 
-  // 3. Get the raw list from DB (This only happens once)
+  // 3. Raw Data
   private allPosts$ = this.dbService.getPosts();
   private allAssoc$ = this.dbService.getAssociations();
 
-  // 4. Filtered Posts Pipeline
+  // --- Helpers & Actions ---
+
+  isFavorite(postId: string | undefined): boolean {
+    if (!this.currentUser || !this.currentUser.favorites || !postId) return false;
+    return this.currentUser.favorites.includes(postId);
+  }
+
+  async toggleFavorite(post: Post) {
+    // Safety check using the getter
+    if (!this.currentUser || !this.currentUser.uid || !post.id) {
+      alert('Debes iniciar sesión para guardar favoritos');
+      return;
+    }
+
+    const userId = this.currentUser.uid;
+    const postId = post.id;
+
+    try {
+      if (this.isFavorite(postId)) {
+        await this.dbService.removeFromFavorites(userId, postId);
+        console.log('Removed from favorites');
+      } else {
+        await this.dbService.saveToFavorites(userId, postId);
+        console.log('Added to favorites');
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
+  }
+
+  async addApplicant(post:Post){
+    if (!this.currentUser || !this.currentUser.uid || !post.id) {
+      alert('Debes iniciar sesión para guardar favoritos');
+      return;
+    }
+
+    const userId = this.currentUser.uid;
+    const postId = post.id;
+
+  }
+  
+  // --- Pipelines ---
+
   posts$: Observable<Post[]> = combineLatest([
     this.allPosts$,
     this.searchTerm$,
@@ -38,26 +98,23 @@ export class Main implements OnChanges {
     this.currentUser$
   ]).pipe(
     map(([posts, term, isFavMode, user]) => {
-
       let filtered = posts;
 
-      // --- STAGE 1: Filter by Favorites (if enabled) ---
+      // Debugging log to see what the pipeline sees
+      if(isFavMode && !user) console.warn("Fav mode is ON but User is undefined in pipeline");
+
+      // A. FILTER BY FAVORITES
       if (isFavMode) {
         if (!user || !user.favorites) {
-          return []; // If mode is ON but no user/favs, return empty
+          return []; // Mode is ON but user (or favs) missing -> Empty list
         }
-        // Filter: Keep post only if its ID is in the user's favorites array
-        // Assuming Post has an 'id' or 'uid' field. Adjust 'p.id' if your model uses 'uid'
         filtered = filtered.filter(p => p.id && user.favorites.includes(p.id));
       }
 
-      // --- STAGE 2: Filter by Search Term ---
-      if (!term || term.trim() === '') {
-        return filtered;
-      }
+      // B. FILTER BY SEARCH
+      if (!term || term.trim() === '') return filtered;
 
       const lowerTerm = term.toLowerCase();
-
       return filtered.filter(post =>
         post.title.toLowerCase().includes(lowerTerm) ||
         post.description.toLowerCase().includes(lowerTerm) ||
@@ -69,27 +126,17 @@ export class Main implements OnChanges {
     })
   );
 
-  // 5. Filtered Associations Pipeline
-  // (Assuming Favorites logic only applies to Posts. If Asoc can be faved, copy logic above)
   asoc$: Observable<Association[]> = combineLatest([
     this.allAssoc$,
     this.searchTerm$,
     this.favDelimitation$
   ]).pipe(
     map(([asoc, term, isFavMode]) => {
-
-      // Usually, if we are in "Favorites Mode", we might want to hide Associations 
-      // unless you also have logic for favorite associations.
-      if (isFavMode) {
-        return [];
-      }
-
-      if (!term || term.trim() === '') {
-        return asoc;
-      }
+      if (isFavMode) return []; // Hide associations in fav mode
+      
+      if (!term || term.trim() === '') return asoc;
 
       const lowerTerm = term.toLowerCase();
-
       return asoc.filter(aso =>
         aso.nameAssociation.toLowerCase().includes(lowerTerm) ||
         aso.description.toLowerCase().includes(lowerTerm) ||
@@ -98,17 +145,4 @@ export class Main implements OnChanges {
       );
     })
   )
-
-  // 6. Update Subjects when inputs change
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['searchterm']) {
-      this.searchTerm$.next(this.searchterm);
-    }
-    if (changes['favDelimitation']) {
-      this.favDelimitation$.next(this.favDelimitation);
-    }
-    if (changes['currentUser']) {
-      this.currentUser$.next(this.currentUser);
-    }
-  }
 }

@@ -1,8 +1,16 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Aside } from './aside/aside';
 import { Main } from './main/main';
-import { User } from '../models/post.model';
+import { User, Post, PostApplicant } from '../models/post.model';
+import { DatabaseService } from '../services/database';
+import { forkJoin, map, switchMap, of } from 'rxjs';
+
+// Define a combined interface for the view
+interface ApplicationWithPost {
+  applicant: PostApplicant;
+  post: Post;
+}
 declare var lucide: any;
 
 @Component({
@@ -63,6 +71,7 @@ export class Ayudante implements OnInit {
 
   changeScreen(event: string){
     this.currentScreen = event;
+    
     setTimeout(() => {
       if (typeof lucide !== 'undefined') {
         lucide.createIcons();

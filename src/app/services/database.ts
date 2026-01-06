@@ -19,6 +19,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Post, User, Association, PostApplicant } from '../models/post.model';
+import { collectionGroup } from '@angular/fire/firestore/lite';
 
 @Injectable({
   providedIn: 'root'
@@ -67,6 +68,23 @@ export class DatabaseService {
   async updateUser(uid: string, data: Partial<User>) {
     const userRef = doc(this.firestore, `users/${uid}`);
     return updateDoc(userRef, data);
+  }
+
+  async removeFromFavorites(uid: string, postId: string): Promise<void> {
+    const userRef = doc(this.firestore, `users/${uid}`);
+    return updateDoc(userRef, {
+      favorites: arrayRemove(postId)
+    });
+  }
+  
+  async saveToFavorites(uid: string, postId: string): Promise<void> {
+    const userRef = doc(this.firestore, `users/${uid}`);
+
+    // Atomically add the new postId to the "favorites" array.
+    // arrayUnion ensures the ID is unique (it won't add duplicates).
+    return updateDoc(userRef, {
+      favorites: arrayUnion(postId)
+    });
   }
 
   // =================================================================
@@ -180,6 +198,19 @@ export class DatabaseService {
     const applicantsRef = collection(this.firestore, 'applicants');
     const q = query(applicantsRef, where('postId', '==', postId));
     return collectionData(q, { idField: 'applicantId' }) as Observable<PostApplicant[]>;
+  }
+
+  getApplicationsByUser(userId: string): Observable<any[]> {
+    const ref = collection(this.firestore, 'applicants'); // Or collectionGroup if subcollection
+    // Note: Since your structure is posts/{id}/applicants/{uid}, querying all applications 
+    // for a user efficiently requires a Collection Group Index in Firestore.
+    // For now, we will assume you have a way to get them, or we use the 'applicants' collection strategy.
+
+    // *Simple Alternative for Client-Side visual check:*
+    // If you don't have a collectionGroup query set up, the visual check might need 
+    // to happen differently. Assuming you have the method from the previous step:
+    const q = query(collectionGroup(this.firestore, 'applicants'), where('uid', '==', userId));
+    return collectionData(q, { idField: 'applicantId' });
   }
 
   // =================================================================

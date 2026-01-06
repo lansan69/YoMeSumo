@@ -181,6 +181,12 @@
                                             {{ getPendingCount(post.id!) }} Solicitudes Pendientes</p>
                                     </div>
                                 </div>
+
+                                <button (click)="$event.stopPropagation(); deletePost(post.id!)"
+                                    class="text-gray-300 hover:text-red-500 hover:bg-red-50 p-3 rounded-full transition-all duration-200"
+                                    title="Eliminar Publicación">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
                             </div>
 
                             <button (click)="$event.stopPropagation(); togglePost(post.id)"
