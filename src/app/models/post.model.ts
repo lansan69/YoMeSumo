@@ -6,6 +6,7 @@ export interface User {
     phone: string;
     favorites: string[]; // ['post_id_1', 'post_id_2']
     createdAt: any;
+    about?: string; // se añadio esta parte para editar el sobre mi
 }
 
 export interface Association{
