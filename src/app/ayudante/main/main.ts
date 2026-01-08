@@ -3,7 +3,7 @@ import { Component, inject, Input } from '@angular/core'; // Removed OnChanges, 
 import { Observable, BehaviorSubject, combineLatest, map } from 'rxjs';
 
 import { DatabaseService } from '../../services/database';
-import { Post, Association, User } from '../../models/post.model';
+import { Post, Association, User, PostApplicant } from '../../models/post.model';
 
 @Component({
   selector: 'app-main',
@@ -14,7 +14,7 @@ import { Post, Association, User } from '../../models/post.model';
 })
 export class Main {
   private dbService = inject(DatabaseService);
-  
+  appliedPostIds = new Set<string>();
   // --- 1. Inputs converted to Setters for Reactivity ---
   
   // Backing field for currentUser so we can access it in toggleFavorite
@@ -56,6 +56,11 @@ export class Main {
     return this.currentUser.favorites.includes(postId);
   }
 
+  hasApplied(postId: string | undefined): boolean {
+    if (!postId) return false;
+    return this.appliedPostIds.has(postId);
+  }
+
   async toggleFavorite(post: Post) {
     // Safety check using the getter
     if (!this.currentUser || !this.currentUser.uid || !post.id) {
@@ -79,15 +84,51 @@ export class Main {
     }
   }
 
-  async addApplicant(post:Post){
+  async addApplicant(post: Post) {
+    // A. Validation
     if (!this.currentUser || !this.currentUser.uid || !post.id) {
-      alert('Debes iniciar sesión para guardar favoritos');
+      alert('Debes iniciar sesión para sumarte a una causa.');
       return;
     }
+
+    if (this.hasApplied(post.id)) {
+      alert('Ya te has postulado a esta iniciativa.');
+      return;
+    }
+
+    // B. Optional: Ask for a short message (Simple Prompt for now)
+    const message = prompt("¿Quieres dejar un mensaje al organizador?", "Hola, me gustaría apoyar en esta actividad.");
+    if (message === null) return; // User cancelled
 
     const userId = this.currentUser.uid;
     const postId = post.id;
 
+    // C. Create the Data Object based on your PostApplicant Model
+    const applicationData: PostApplicant = {
+      uid: userId,
+      applicantId: userId, // Redundant but matches your model
+      postId: postId,
+      helperName: this.currentUser.displayName || 'Usuario',
+      helperPhone: this.currentUser.phone || '',
+      helperEmail: this.currentUser.email || '',
+      message: message,
+      status: 'pending',
+      timestamp: null // The service adds serverTimestamp()
+    };
+
+    try {
+      // D. Call Database Service
+      await this.dbService.addApplicant(postId, userId, applicationData);
+
+      // E. Update UI immediately (Optimistic update)
+      this.appliedPostIds.add(postId);
+      console.log('Postulación exitosa');
+      console.log(this.appliedPostIds);
+
+    } catch (error) {
+      console.error('Error al postularse:', error);
+      alert('Hubo un error al intentar sumarte. Intenta de nuevo.');
+    }
   }
 
   openPostDetails(post: Post) {

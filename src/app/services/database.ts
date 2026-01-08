@@ -161,7 +161,7 @@ export class DatabaseService {
   // =================================================================
 
   async addApplicant(postId: string, userId: string, applicationData: any) {
-    const applicantRef = doc(this.firestore, `posts/${postId}/applicants/${userId}`);
+    const applicantRef = doc(this.firestore, `applicants/${userId}`);
     const postRef = doc(this.firestore, `posts/${postId}`);
 
     // 1. Add the applicant document

@@ -20,13 +20,6 @@
             <span>Mi Perfil</span>
         </a>
 
-        <a (click)="changeActive('llamados')"
-            [class]="activeView === 'llamados' ? 'bg-brand-light text-brand-dark font-bold shadow-sm translate-x-1' : 'text-brand-dark hover:bg-brand-light hover:translate-x-1'"
-            class="flex items-center gap-4 py-3 px-4 rounded-2xl transition-all duration-200 cursor-pointer group select-none">
-            <i data-lucide="megaphone" class="w-5 h-5 stroke-[2]"></i>
-            <span>Llamados</span>
-        </a>
-
         <a (click)="changeActive('publicaciones')"
             [class]="activeView === 'publicaciones' ? 'bg-brand-light text-brand-dark font-bold shadow-sm translate-x-1' : 'text-brand-dark hover:bg-brand-light hover:translate-x-1'"
             class="flex items-center gap-4 py-3 px-4 rounded-2xl transition-all duration-200 cursor-pointer group select-none">
