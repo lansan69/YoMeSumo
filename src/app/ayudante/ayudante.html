@@ -162,12 +162,19 @@
 
                                         
                                     </div>
-                                    <div class="flex items-center gap-4 text-gray-600">
-                                        <div class="bg-brand-cream p-2 rounded-lg shrink-0">
-                                            <i data-lucide="mail" class="w-4 h-4 text-brand-medium"></i>
-                                        </div>
-                                        <span class="text-sm font-medium break-all">{{ currentUser.email }}</span>
-                                    </div>
+                            <div class="flex items-center gap-4 text-gray-600">
+                                <div class="bg-brand-cream p-2 rounded-lg shrink-0">
+                                    <i data-lucide="mail" class="w-4 h-4 text-brand-medium"></i>
+                                </div>
+                                
+                                <span *ngIf="!isEditingProfile" class="text-sm font-medium break-all">
+                                    {{ currentUser.email }}
+                                </span>
+
+                                <input *ngIf="isEditingProfile" type="email" [(ngModel)]="currentUser.email"
+                                    class="text-sm font-medium w-full border-b-2 border-brand-medium/50 focus:border-brand-medium focus:outline-none bg-transparent text-brand-dark px-1"
+                                    placeholder="Nuevo correo...">
+                            </div>
                                 </div>
                             </div>
                             <div class="bg-brand-cream/40 p-5 rounded-2xl">

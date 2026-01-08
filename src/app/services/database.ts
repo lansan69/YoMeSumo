@@ -113,6 +113,21 @@ export class DatabaseService {
     return docData(assocRef, { idField: 'id' }) as Observable<Association>;
   }
 
+  // Obtener Asociación por Email
+  getAssociationByEmail(email: string): Observable<Association | undefined> {
+    // 1. Referencia a la colección correcta 'asociaciones'
+    const assocRef = collection(this.firestore, 'asociaciones');
+    
+    // 2. Query para buscar donde el campo 'email' coincida
+    const q = query(assocRef, where('email', '==', email));
+
+    // 3. Mapeo: collectionData devuelve un array, tomamos el primero (si existe)
+    // Nota: Usamos 'id' en lugar de 'uid' porque tu interfaz Association suele usar 'id'
+    return collectionData(q, { idField: 'id' }).pipe(
+      map((associations: any[]) => associations.length > 0 ? (associations[0] as Association) : undefined)
+    );
+  }
+
   async updateAssociation(id: string, data: Partial<Association>) {
     const assocRef = doc(this.firestore, `asociaciones/${id}`);
     return updateDoc(assocRef, data);

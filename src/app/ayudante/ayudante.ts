@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // <--- AGREGADO PARA EDITAR BOTON DE EDITAR
+import { FormsModule } from '@angular/forms';
 import { Aside } from './aside/aside';
 import { Main } from './main/main';
 import { User, Post, PostApplicant } from '../models/post.model';
@@ -13,10 +13,11 @@ interface ApplicationWithPost extends PostApplicant {
 }
 
 declare var lucide: any;
+declare var iziToast: any; // <--- Declaramos iziToast para que TS lo reconozca
 
 @Component({
   selector: 'app-ayudante',
-  imports: [Aside, Main, CommonModule, FormsModule], //SOLO SE AGREGO FORMSMODULE 
+  imports: [Aside, Main, CommonModule, FormsModule],
   templateUrl: './ayudante.html',
   styleUrl: './ayudante.css',
 })
@@ -25,7 +26,8 @@ export class Ayudante implements OnInit {
   private cd = inject(ChangeDetectorRef);
   private appsSubscription: Subscription | undefined;
   
-  constructor(private db: DatabaseService) {} // <--- se agrego esta linea para usar el servicio de base de datos
+  constructor(private db: DatabaseService) {}
+
   // Logic for white hands
   appliedPostIds = new Set<string>();
 
@@ -34,6 +36,25 @@ export class Ayudante implements OnInit {
 
   ngOnInit(): void {
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    
+    // --- CONFIGURACIÓN GLOBAL DE IZITOST ---
+    // Esto asegura que todos los toasts tengan el mismo estilo base
+    if (typeof iziToast !== 'undefined') {
+      iziToast.settings({
+        timeout: 4000, // Duración por defecto
+        resetOnHover: true,
+        transitionIn: 'flipInX',
+        transitionOut: 'flipOutX',
+        position: 'topRight', // Posición estándar
+        theme: 'light',
+        progressBarColor: '#ADC2A9', // Tu color 'brand-medium'
+        imageWidth: 50,
+        layout: 2,
+        balloon: false,
+        close: true,
+        closeOnEscape: true,
+      });
+    }
   }
 
   private searchTerm: string = "";
@@ -43,37 +64,77 @@ export class Ayudante implements OnInit {
   currentScreen = "llamados";
   currentUser: User | undefined = undefined;
 
-  // --- INICIO BLOQUE EDICIÓN (SE AGREGO)---
+  // --- INICIO BLOQUE EDICIÓN ---
   isEditingProfile: boolean = false;
 
   toggleEdit() {
     this.isEditingProfile = !this.isEditingProfile;
   }
 
-  // --- FUNCIÓN DE GUARDADO FINAL ---
+  // --- FUNCIÓN DE GUARDADO CON VALIDACIÓN DE CORREO ---
   saveProfile() {
-    if (!this.currentUser) return; // Seguridad por si acaso
+    if (!this.currentUser) return;
 
-    // 1. Preparamos solo los datos que queremos enviar (para no enviar todo el objeto user)
-    const datosAActualizar = {
-      phone: this.currentUser.phone,
-      about: this.currentUser.about // Recuerda el signo ? en el modelo
-    };
+    const emailToCheck = this.currentUser.email.trim();
+    console.log("Validando correo:", emailToCheck);
 
-    console.log("Enviando a Firebase...", datosAActualizar);
+    // 1. Consultamos ambas colecciones (Users y Asociaciones)
+    forkJoin({
+      userCheck: this.db.getUserByEmail(emailToCheck).pipe(take(1)),
+      assocCheck: this.db.getAssociationByEmail(emailToCheck).pipe(take(1))
+    }).subscribe((results) => {
+      
+      const userExists = results.userCheck;
+      const assocExists = results.assocCheck;
 
-    // 2. Llamamos a tu servicio 'updateUser'
-    this.db.updateUser(this.currentUser.uid, datosAActualizar)
-      .then(() => {
-        // ÉXITO
-        console.log('¡Perfil actualizado correctamente!');
-        this.isEditingProfile = false; // Cerramos el modo edición
-      })
-      .catch((error) => {
-        // ERROR
-        console.error('Error al actualizar perfil:', error);
-        alert('Hubo un problema al guardar. Intenta de nuevo.');
-      });
+      // 2. REGLA DE SEGURIDAD
+      if (assocExists || (userExists && userExists.uid !== this.currentUser!.uid)) {
+        
+        // REEMPLAZO DE ALERT CON IZITOAST ERROR
+        iziToast.error({
+          title: 'Error de Correo',
+          message: 'El correo electrónico ya está registrado en otra cuenta.',
+          position: 'center', // Alerta importante al centro
+          timeout: 5000
+        });
+        
+        console.error("Conflicto de correo detectado.");
+        return;
+
+      } else {
+        
+        // 3. Si pasó la validación, preparamos los datos
+        const datosAActualizar = {
+          phone: this.currentUser!.phone,
+          about: this.currentUser!.about,
+          email: emailToCheck
+        };
+
+        console.log("Correo válido. Enviando a Firebase...", datosAActualizar);
+
+        // 4. Actualizamos
+        this.db.updateUser(this.currentUser!.uid, datosAActualizar)
+          .then(() => {
+            // REEMPLAZO DE CONSOLE LOG CON IZITOAST SUCCESS
+            iziToast.success({
+              title: '¡Guardado!',
+              message: 'Tu perfil ha sido actualizado correctamente.',
+              position: 'topRight'
+            });
+            
+            this.isEditingProfile = false;
+          })
+          .catch((error) => {
+            console.error('Error al actualizar perfil:', error);
+            
+            // REEMPLAZO DE ALERT DE ERROR
+            iziToast.error({
+              title: 'Error Técnico',
+              message: 'Hubo un problema al guardar. Intenta de nuevo más tarde.',
+            });
+          });
+      }
+    });
   }
   // --- FIN BLOQUE EDICIÓN ---
 
@@ -113,29 +174,24 @@ export class Ayudante implements OnInit {
     }
   }
 
-  // --- FIXED: LOAD IDS AND DETAILS IN ONE GO ---
   loadUserApplications(userId: string) {
     console.log("🔄 Loading applications for user:", userId);
 
     this.appsSubscription = this.dbService.getUserApplications(userId).pipe(
       switchMap(apps => {
-        // 1. Update the Set for "White Hands" logic immediately
         this.appliedPostIds.clear();
         apps.forEach(app => {
           if (app.postId) this.appliedPostIds.add(app.postId);
         });
 
-        // If no apps, return empty list to clear screen
         if (apps.length === 0) {
           return of([]);
         }
 
-        // 2. Fetch Post Details for each application (for the Cards)
         const tasks = apps.map(app =>
           this.dbService.getPostById(app.postId).pipe(
             take(1),
             map(post => {
-              // If post is deleted (null), we return null to filter it out later
               if (!post) return null;
               return {
                 ...app,
@@ -153,41 +209,64 @@ export class Ayudante implements OnInit {
       })
     ).subscribe({
       next: (fullData) => {
-        // 3. Filter out nulls (deleted posts) and update the Grid Data
-        // 'fullData' is typed as (ApplicationWithPost | null)[] here, so we cast the result
         const validData = fullData.filter(item => item !== null) as ApplicationWithPost[];
-
         this.myApplications = validData;
-
         console.log("✅ Data ready for Contador screen:", this.myApplications);
-
-        // 4. Force View Update
         this.cd.detectChanges();
-
-        // 5. Re-render icons for the new cards
         setTimeout(() => { if (typeof lucide !== 'undefined') lucide.createIcons(); }, 100);
       },
       error: (err) => console.error("Error loading user apps:", err)
     });
   }
 
+  // --- REEMPLAZO DE CONFIRM NATIVO POR IZITOAST ---
   async cancelApplication(postId: string) {
     if (!this.currentUser) return;
 
-    const confirmCancel = confirm("¿Estás seguro de cancelar esta postulación?");
-    if (!confirmCancel) return;
+    // Usamos iziToast.question para un confirm más bonito
+    iziToast.question({
+      timeout: 20000,
+      close: false,
+      overlay: true,
+      displayMode: 'once',
+      id: 'question',
+      zindex: 999,
+      title: '¿Estás seguro?',
+      message: '¿Deseas cancelar esta postulación?',
+      position: 'center',
+      buttons: [
+        ['<button><b>SÍ, CANCELAR</b></button>', async (instance: any, toast: any) => {
+          
+          // Lógica de cancelación
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          
+          try {
+            await this.dbService.removeApplicant(postId, this.currentUser!.uid);
 
-    try {
-      await this.dbService.removeApplicant(postId, this.currentUser.uid);
+            // Actualización optimista de la UI
+            this.myApplications = this.myApplications.filter(app => app.postId !== postId);
+            this.appliedPostIds.delete(postId);
+            this.cd.detectChanges(); 
 
-      // Optimistic updates
-      this.myApplications = this.myApplications.filter(app => app.postId !== postId);
-      this.appliedPostIds.delete(postId);
+            iziToast.success({
+              title: 'Cancelada',
+              message: 'La postulación ha sido eliminada correctamente.',
+            });
 
-      this.cd.detectChanges(); // Update view
-    } catch (error) {
-      console.error("Error cancelling:", error);
-    }
+          } catch (error) {
+            console.error("Error cancelling:", error);
+            iziToast.error({
+              title: 'Error',
+              message: 'No se pudo cancelar la postulación.',
+            });
+          }
+
+        }, true], // true para cerrar al hacer click
+        ['<button>NO</button>', (instance: any, toast: any) => {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }]
+      ]
+    });
   }
 
   getContactLink(phone: string | undefined, title: string | undefined) {
