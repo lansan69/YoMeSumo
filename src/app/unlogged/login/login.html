@@ -45,6 +45,7 @@
                 </div>
 
                 <div class="w-full flex flex-col gap-3">
+
                     <ng-container *ngIf="registerType === 'usuario'">
                         <input type="text" placeholder="Nombre" name="regName" [(ngModel)]="regName"
                             class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
@@ -55,8 +56,26 @@
                         <input type="email" placeholder="Email" name="regEmail" [(ngModel)]="regEmail"
                             class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
 
-                        <input type="password" placeholder="Contraseña" name="regPass" [(ngModel)]="regPass"
-                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                        <div class="relative w-full">
+                            <input [type]="showRegPass ? 'text' : 'password'" placeholder="Contraseña" name="regPass"
+                                [(ngModel)]="regPass"
+                                class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                            <button type="button" (click)="showRegPass = !showRegPass"
+                                class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-brand-dark focus:outline-none">
+                                <svg *ngIf="!showRegPass" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <svg *ngIf="showRegPass" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                            </button>
+                        </div>
                     </ng-container>
 
                     <ng-container *ngIf="registerType === 'asociacion'">
@@ -104,8 +123,26 @@
                         <input type="email" placeholder="Email" name="assocEmail" [(ngModel)]="assocEmail"
                             class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
 
-                        <input type="password" placeholder="Contraseña" name="assocPass" [(ngModel)]="assocPass"
-                            class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                        <div class="relative w-full">
+                            <input [type]="showAssocPass ? 'text' : 'password'" placeholder="Contraseña"
+                                name="assocPass" [(ngModel)]="assocPass"
+                                class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                            <button type="button" (click)="showAssocPass = !showAssocPass"
+                                class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-brand-dark focus:outline-none">
+                                <svg *ngIf="!showAssocPass" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <svg *ngIf="showAssocPass" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                            </button>
+                        </div>
                     </ng-container>
                 </div>
 
@@ -137,8 +174,25 @@
                 <input type="email" placeholder="Email" name="loginEmail" [(ngModel)]="loginEmail"
                     class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-3 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
 
-                <input type="password" placeholder="Contraseña" name="loginPass" [(ngModel)]="loginPass"
-                    class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 px-4 mb-1 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                <div class="relative w-full mb-1">
+                    <input [type]="showLoginPass ? 'text' : 'password'" placeholder="Contraseña" name="loginPass"
+                        [(ngModel)]="loginPass"
+                        class="w-full bg-brand-light/30 text-gray-700 border-none rounded-lg py-3 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-brand-medium placeholder-gray-400 font-sans" />
+                    <button type="button" (click)="showLoginPass = !showLoginPass"
+                        class="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500 hover:text-brand-dark focus:outline-none">
+                        <svg *ngIf="!showLoginPass" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <svg *ngIf="showLoginPass" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                        </svg>
+                    </button>
+                </div>
 
                 <div class="h-6 mb-3 w-full text-center">
                     <p *ngIf="loginError" class="text-xs text-red-500 font-bold animate-pulse">

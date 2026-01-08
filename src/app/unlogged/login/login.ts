@@ -23,6 +23,10 @@ export class Login implements AfterViewInit {
   private firestore = inject(Firestore);
   private dbService = inject(DatabaseService);
 
+  showRegPass: boolean = false;
+  showAssocPass: boolean = false;
+  showLoginPass: boolean = false;
+
   isSignUpActive: boolean = false;
   registerType: 'usuario' | 'asociacion' = 'usuario';
 

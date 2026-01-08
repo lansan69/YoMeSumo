@@ -19,6 +19,7 @@ export class Main {
   
   // Backing field for currentUser so we can access it in toggleFavorite
   private _currentUser: User | undefined;
+  selectedPost: Post | null = null;
   
   @Input() set currentUser(val: User | undefined) {
     this._currentUser = val;
@@ -87,6 +88,14 @@ export class Main {
     const userId = this.currentUser.uid;
     const postId = post.id;
 
+  }
+
+  openPostDetails(post: Post) {
+    this.selectedPost = post;
+  }
+
+  closePostDetails() {
+    this.selectedPost = null;
   }
   
   // --- Pipelines ---

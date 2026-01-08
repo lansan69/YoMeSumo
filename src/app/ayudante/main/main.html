@@ -72,10 +72,10 @@
         </div>
 
         <div class="bg-brand-dark text-white flex text-xs font-medium divide-x divide-white/20">
-            <button
+            <button (click)="openPostDetails(post)"
                 class="flex-1 flex flex-col items-center gap-1 hover:bg-black/10 transition-colors transition py-2 cursor-pointer group/btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                    class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -199,5 +199,137 @@
             </button>
         </div>
 
+    </div>
+</div>
+
+<div *ngIf="selectedPost"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+
+    <button (click)="closePostDetails()"
+        class="absolute top-4 right-4 md:top-6 md:right-6 z-[60] p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer focus:outline-none bg-black/20 md:bg-transparent">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"
+            class="w-6 h-6 md:w-8 md:h-8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
+
+    <div
+        class="relative bg-brand-cream rounded-[2rem] shadow-2xl w-full max-w-[900px] min-h-[500px] max-h-[90vh] overflow-hidden flex flex-col md:flex-row">
+
+        <div class="w-full md:w-1/2 h-48 md:h-auto relative bg-gray-100 group shrink-0">
+            <a [href]="'https://www.google.com/maps/search/?api=1&query=' + selectedPost.location.lat + ',' + selectedPost.location.lng"
+                target="_blank" class="block w-full h-full relative">
+
+                <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    alt="Map Pattern"
+                    class="w-full h-full object-cover opacity-80 mix-blend-multiply filter grayscale-[30%]">
+
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-dark/30 to-transparent pointer-events-none">
+                </div>
+                <div class="absolute inset-0 opacity-[0.1] pointer-events-none"
+                    style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 10px 10px;">
+                </div>
+
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full drop-shadow-2xl scale-125">
+                    <span
+                        class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75 animate-ping"></span>
+                    <div class="relative">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                            class="w-12 h-12 text-red-500 drop-shadow-sm">
+                            <path fill-rule="evenodd"
+                                d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <div
+                            class="w-4 h-1.5 bg-black/30 rounded-[100%] absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1.5 blur-[2px]">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute bottom-4 left-0 w-full text-center">
+                    <span class="bg-white/90 text-brand-dark px-4 py-1.5 rounded-full text-xs font-bold shadow-lg">
+                        Ver en Google Maps
+                    </span>
+                </div>
+            </a>
+        </div>
+
+        <div class="w-full md:w-1/2 h-full bg-brand-cream flex flex-col overflow-hidden">
+
+            <div class="flex-grow p-6 md:p-10 overflow-y-auto custom-scrollbar">
+
+                <div class="mb-4">
+                    <span
+                        class="inline-block text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-sm border"
+                        [ngClass]="selectedPost.type === 'request' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-brand-medium/10 text-brand-dark border-brand-medium/20'">
+                        {{ selectedPost.type === 'request' ? 'Solicitud de Ayuda' : 'Donación / Voluntariado' }}
+                    </span>
+                </div>
+
+                <h2 class="text-3xl font-bold text-brand-dark mb-4 leading-tight">
+                    {{ selectedPost.title }}
+                </h2>
+
+                <div class="flex items-center gap-3 mb-6 pb-6 border-b border-brand-dark/10">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-medium to-brand-dark flex items-center justify-center text-white text-sm font-bold shadow-md">
+                        {{ selectedPost.authorName.charAt(0) }}
+                    </div>
+                    <div>
+                        <p class="text-brand-dark font-bold text-sm">{{ selectedPost.authorName }}</p>
+                        <p class="text-brand-dark/50 text-xs">Publicado el {{ selectedPost.createdAt?.toDate() |
+                            date:'fullDate' }}</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-brand-dark font-bold text-sm uppercase tracking-wide mb-2 opacity-70">Descripción
+                    </h3>
+                    <p class="text-brand-dark text-sm leading-relaxed whitespace-pre-line opacity-90">
+                        {{ selectedPost.description }}
+                    </p>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-brand-dark font-bold text-sm uppercase tracking-wide mb-3 opacity-70">
+                        Insumos Requeridos
+                    </h3>
+
+                    <div *ngIf="selectedPost.suppliesList && selectedPost.suppliesList.length > 0"
+                        class="flex flex-wrap gap-2">
+                        <span *ngFor="let item of selectedPost.suppliesList"
+                            class="bg-white text-brand-dark text-xs font-medium py-2 px-3 rounded-lg border border-brand-dark/10 shadow-sm">
+                            {{ item }}
+                        </span>
+                    </div>
+
+                    <div *ngIf="!selectedPost.suppliesList || selectedPost.suppliesList.length === 0"
+                        class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 text-center">
+                        <p class="text-gray-400 italic text-xs">No se especificaron insumos para esta publicación.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 bg-brand-light/30 border-t border-brand-dark/5 flex gap-3 shrink-0">
+                <button
+                    class="flex-1 bg-brand-dark text-white text-xs font-bold uppercase py-3 rounded-xl shadow-lg hover:bg-brand-medium transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                        <path fill-rule="evenodd"
+                            d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Sumarse
+                </button>
+                <button
+                    class="bg-white text-brand-dark border border-brand-dark/10 text-xs font-bold uppercase py-3 px-4 rounded-xl shadow-sm hover:bg-gray-50 transition-all active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                        stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                </button>
+            </div>
+
+        </div>
     </div>
 </div>

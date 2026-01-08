@@ -46,5 +46,11 @@ export class Unlogged {
     console.log("new category from users", event)
     this.category.emit(event);
   }
+
+  handleEmit(event: boolean){
+    if(event){
+      this.setModalLoginTrue();
+    }
+  }
   
 }
