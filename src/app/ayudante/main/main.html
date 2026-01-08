@@ -192,23 +192,13 @@
                 </svg>
                 <span>WhatsApp</span>
             </a>
-
-            <button
-                class="flex-1 flex flex-col items-center gap-1 hover:bg-black/10 transition-colors transition py-2 cursor-pointer group/btn">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                    stroke="currentColor" class="w-4 h-4 group-hover/btn:scale-110 transition-transform">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.385a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                </svg>
-                <span>Favoritos</span>
-            </button>
         </div>
 
     </div>
 </div>
 
 <div *ngIf="selectedPost"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
 
     <button (click)="closePostDetails()"
         class="absolute top-4 right-4 md:top-6 md:right-6 z-[60] p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300 cursor-pointer focus:outline-none bg-black/20 md:bg-transparent">

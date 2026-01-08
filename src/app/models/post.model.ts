@@ -29,6 +29,7 @@ export interface Post {
     id?: string;
     authorId: string;
     authorName: string;
+    authorPhone:string;
     type: 'request' | 'offer';
     title: string;
     description: string;

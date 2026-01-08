@@ -4,7 +4,7 @@
         class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 md:hidden transition-opacity">
     </div>
 
-    <div class="fixed inset-y-0 left-0 z-[60] w-64 bg-brand-cream border-r border-brand-light shadow-2xl transform transition-transform duration-300 md:hidden"
+    <div class="fixed inset-y-0 left-0 w-64 bg-brand-cream border-r border-brand-light shadow-2xl transform transition-transform duration-300 md:hidden"
         [class.-translate-x-full]="!isSidebarOpen" [class.translate-x-0]="isSidebarOpen">
         <app-aside (screenChange)="changeScreen($event); isSidebarOpen = false" (logout)="logOut()"
             (currentUsr)="getUser($event)" class="h-full block">
@@ -12,7 +12,7 @@
     </div>
 
     <aside
-        class="hidden md:block flex-none w-64 h-full z-40 border-r border-brand-light shadow-lg bg-brand-cream relative">
+        class="hidden md:block flex-none h-full border-r border-brand-light shadow-lg bg-brand-cream relative">
         <app-aside (screenChange)="changeScreen($event)" (logout)="logOut()" (currentUsr)="getUser($event)"
             class="h-full block w-full">
         </app-aside>
@@ -22,7 +22,7 @@
 
         <div class="flex-1 flex flex-col h-full overflow-hidden relative" *ngIf="this.currentScreen == 'llamados'">
             <nav
-                class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm border-b border-brand-light/20">
+                class="sticky top-0 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm border-b border-brand-light/20">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <button (click)="isSidebarOpen = !isSidebarOpen"
                         class="md:hidden p-2 text-brand-dark hover:bg-black/5 rounded-full shrink-0">
@@ -74,43 +74,47 @@
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col h-full overflow-y-auto relative custom-scrollbar" *ngIf="currentScreen === 'perfil'">
-        
+        <div class="flex-1 flex flex-col h-full overflow-y-auto relative custom-scrollbar"
+            *ngIf="currentScreen === 'perfil'">
+
             <div class="md:hidden absolute top-4 left-4 z-30">
                 <button (click)="isSidebarOpen = !isSidebarOpen"
                     class="p-2 bg-white/80 backdrop-blur text-brand-dark shadow-sm hover:bg-white rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
             </div>
-        
+
             <main
                 class="flex-grow p-4 md:p-8 flex flex-col items-start md:items-center justify-start md:justify-center min-h-full">
-        
+
                 <div class="max-w-5xl w-full pt-16 md:pt-0" *ngIf="currentUser">
-        
+
                     <section class="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-10">
                         <div class="flex-grow text-center md:text-left">
                             <h1 class="text-3xl md:text-4xl font-black text-gray-800 tracking-tight">
                                 {{ currentUser.displayName }}
                             </h1>
                             <p class="text-brand-dark font-medium mt-1 text-sm md:text-base">Activo desde el 2025</p>
-        
+
                             <button
                                 class="mt-4 text-xs font-bold text-brand-medium border-2 border-brand-medium px-6 py-2 rounded-full hover:bg-brand-medium hover:text-white transition-all shadow-sm active:scale-95">
                                 EDITAR MI HUELLA
                             </button>
                         </div>
-        
-                        <div class="w-full md:w-64 bg-white p-5 rounded-3xl shadow-sm border border-brand-light/30 shrink-0">
+
+                        <div
+                            class="w-full md:w-64 bg-white p-5 rounded-3xl shadow-sm border border-brand-light/30 shrink-0">
                             <div class="flex justify-between items-end mb-2">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nivel de
                                     Impacto</span>
                                 <span class="text-xs font-bold text-brand-dark">Nvl 2</span>
                             </div>
-                            <div class="w-full bg-brand-cream h-3 rounded-full overflow-hidden border border-brand-light">
+                            <div
+                                class="w-full bg-brand-cream h-3 rounded-full overflow-hidden border border-brand-light">
                                 <div class="bg-brand-medium h-full rounded-full transition-all duration-1000"
                                     style="width: 65%"></div>
                             </div>
@@ -118,7 +122,7 @@
                             </p>
                         </div>
                     </section>
-        
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
                         <div
                             class="bg-white p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-sm border border-gray-50 flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -132,8 +136,7 @@
                                         <div class="bg-brand-cream p-2 rounded-lg shrink-0">
                                             <i data-lucide="phone" class="w-4 h-4 text-brand-medium"></i>
                                         </div>
-                                        <span class="text-sm font-medium break-all">{{ currentUser.phone || 'Sin teléfono'
-                                            }}</span>
+                                        <span class="text-sm font-medium break-all">{{ currentUser.phone || 'Sin teléfono'}}</span>
                                     </div>
                                     <div class="flex items-center gap-4 text-gray-600">
                                         <div class="bg-brand-cream p-2 rounded-lg shrink-0">
@@ -144,14 +147,15 @@
                                 </div>
                             </div>
                             <div class="bg-brand-cream/40 p-5 rounded-2xl">
-                                <h4 class="font-bold mb-2 text-brand-dark text-[10px] uppercase tracking-wider"> Sobre mí</h4>
+                                <h4 class="font-bold mb-2 text-brand-dark text-[10px] uppercase tracking-wider"> Sobre
+                                    mí</h4>
                                 <p class="text-xs text-gray-500 leading-relaxed italic">
                                     "Me apasiona colaborar en albergues de animales y asilos. Siempre busco un espacio
                                     para sumar mis manos."
                                 </p>
                             </div>
                         </div>
-        
+
                         <div
                             class="bg-white p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-sm border border-gray-50 flex flex-col items-center">
                             <h3 class="font-bold mb-8 text-brand-dark uppercase tracking-widest text-[11px]">Insignias
@@ -192,7 +196,7 @@
                                     + ' más para ser Héroe!' : '¡Eres un Héroe de la comunidad!' }} </p>
                         </div>
                     </div>
-        
+
                     <section
                         class="bg-brand-cream p-6 md:p-10 rounded-[30px] md:rounded-[45px] border-b-8 border-brand-light shadow-inner relative overflow-hidden">
                         <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
@@ -200,7 +204,8 @@
                                 <h2 class="text-xl md:text-2xl font-black text-brand-dark mb-2">Tu Impacto en YoMeSumo
                                 </h2>
                                 <p class="text-sm text-gray-600 leading-relaxed max-w-2xl">
-                                    ¡Has hecho un trabajo fenomenal! Tienes <span class="font-bold text-brand-medium text-lg">{{
+                                    ¡Has hecho un trabajo fenomenal! Tienes <span
+                                        class="font-bold text-brand-medium text-lg">{{
                                         currentUser.favorites.length
                                         }}</span> publicaciones guardadas que te importan.
                                 </p>
@@ -209,13 +214,14 @@
                                 class="bg-white px-8 py-5 rounded-[30px] text-center border-2 border-brand-light flex-shrink-0 shadow-sm">
                                 <span class="block text-4xl font-black text-brand-medium">{{
                                     currentUser.favorites.length }}</span>
-                                <span class="text-[10px] font-black uppercase text-brand-dark tracking-[0.2em]">Favoritos</span>
+                                <span
+                                    class="text-[10px] font-black uppercase text-brand-dark tracking-[0.2em]">Favoritos</span>
                             </div>
                         </div>
                         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-brand-light/30 rounded-full blur-3xl">
                         </div>
                     </section>
-        
+
                 </div>
             </main>
         </div>
@@ -268,22 +274,108 @@
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col h-full overflow-y-auto relative custom-scrollbar"
-            *ngIf="this.currentScreen == 'contador'">
-            <div class="md:hidden absolute top-4 left-4 z-30">
-                <button (click)="isSidebarOpen = !isSidebarOpen"
-                    class="p-2 bg-white/80 backdrop-blur text-brand-dark shadow-sm hover:bg-white rounded-full">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
+<div class="flex-1 flex flex-col h-full overflow-y-auto relative custom-scrollbar bg-brand-cream"
+    *ngIf="this.currentScreen == 'contador'">
+
+    <div class="md:hidden absolute top-4 left-4 z-30">
+        <button (click)="isSidebarOpen = !isSidebarOpen"
+            class="p-2 bg-white/80 backdrop-blur text-brand-dark shadow-sm hover:bg-white rounded-full">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
+
+    <main class="flex-grow p-4 md:p-10 w-full max-w-7xl mx-auto pt-16 md:pt-10">
+
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 tracking-tight">Mis Sumas</h1>
+                <p class="text-sm text-[#99A799] italic">
+                    Historial de las causas a las que te has unido.
+                </p>
             </div>
-            <main class="flex-grow p-4 md:p-8">
-                In Contador
-            </main>
+
+            <div
+                class="bg-[#ADC2A9]/20 text-[#5b635b] px-5 py-2 rounded-2xl font-bold border border-[#ADC2A9]/30 flex items-center gap-2">
+                <i data-lucide="hand-helping" class="w-5 h-5"></i>
+                <span>{{ myApplications.length }} Postulaciones</span>
+            </div>
+        </header>
+
+        <div *ngIf="myApplications.length === 0" class="flex flex-col items-center justify-center py-20 opacity-60">
+            <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-300">
+                <i data-lucide="inbox" class="w-10 h-10"></i>
+            </div>
+            <p class="text-xl text-gray-400 font-medium">Aún no te has sumado a ninguna causa.</p>
+            <button (click)="changeScreen('llamados')" class="mt-4 text-brand-medium font-bold hover:underline">
+                Explorar Publicaciones
+            </button>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <div *ngFor="let app of myApplications"
+                class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full group">
+
+                <div class="p-6 pb-4 flex justify-between items-start">
+                    <div
+                        class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 bg-[#FEF5ED] text-brand-medium">
+                        <i [attr.data-lucide]="app.postDetails?.type === 'request' ? 'heart-handshake' : 'gift'"
+                            class="w-6 h-6"></i>
+                    </div>
+
+                    <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border"
+                        [ngClass]="{
+                            'bg-yellow-50 text-yellow-600 border-yellow-100': app.status === 'pending',
+                            'bg-green-50 text-green-600 border-green-100': app.status === 'accepted',
+                            'bg-red-50 text-red-600 border-red-100': app.status === 'rejected'}">
+                        {{ app.status === 'pending' ? 'Pendiente' : (app.status === 'accepted' ? 'Aceptada' :
+                        'Rechazada') }}
+                    </span>
+                </div>
+
+                <div class="px-6 flex-grow">
+                    <h3 class="font-bold text-gray-800 text-lg leading-tight mb-2 line-clamp-2">
+                        {{ app.postDetails?.title || 'Publicación no disponible' }}
+                    </h3>
+                    <p class="text-xs text-gray-400 font-medium mb-4 flex items-center gap-1">
+                        <i data-lucide="calendar" class="w-3 h-3"></i>
+                        Postulado el {{ app.timestamp?.toDate() | date:'mediumDate' }}
+                    </p>
+
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 mb-4">
+                        <p class="text-xs text-gray-500 italic line-clamp-2">
+                            "{{ app.message }}"
+                        </p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-gray-50/50 border-t border-gray-100 flex gap-2 mt-auto">
+
+                    <a *ngIf="app.postDetails"
+                        [href]="getContactLink(app.postDetails.authorPhone || '521', app.postDetails.title)"
+                        target="_blank"
+                        class="flex-1 bg-white border border-gray-200 text-gray-600 py-2.5 rounded-xl text-xs font-bold hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-colors flex items-center justify-center gap-2 no-underline">
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.246 2.248 3.484 5.232 3.483 8.412-.003 6.557-5.338 11.892-11.893 11.892-1.997-.001-3.951-.5-5.688-1.448l-6.308 1.656zm6.236-3.365c1.554.92 3.127 1.403 4.769 1.403 5.251 0 9.524-4.272 9.527-9.524.002-5.251-4.272-9.525-9.524-9.525-2.544 0-4.933 1-6.732 2.799-1.799 1.799-2.797 4.19-2.798 6.734-.001 1.737.491 3.398 1.422 4.801l-.986 3.6 3.692-.968z" />
+                        </svg>
+                        Contactar
+                    </a>
+
+                    <button (click)="cancelApplication(app.postId)"
+                        class="flex-1 bg-white border border-gray-200 text-gray-400 py-2.5 rounded-xl text-xs font-bold hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+                        Cancelar
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
 
     </main>
 </div>
