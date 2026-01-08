@@ -34,6 +34,15 @@
             <span>Mis favoritos</span>
         </a>
 
+        <a (click)="changeActive('contador')"
+            [class]="activeView === 'contador' ? 'bg-brand-light text-brand-dark font-bold shadow-sm translate-x-1' : 'text-brand-dark hover:bg-brand-light hover:translate-x-1'"
+            class="flex items-center gap-4 py-3 px-4 rounded-2xl transition-all duration-200 cursor-pointer group select-none">
+
+            <i data-lucide="hand-helping" class="w-5 h-5 stroke-[2]"></i>
+
+            <span>Contador de Sumas</span>
+        </a>
+
         <button (click)="onLogout()"
             class="mt-auto flex items-center gap-4 py-3 px-4 rounded-2xl text-[#D67D7D] font-medium transition-all duration-200 hover:bg-[#FFF0F0] hover:text-[#B24C4C] hover:translate-x-1 cursor-pointer w-full text-left">
             <i data-lucide="log-out" class="w-5 h-5 stroke-[2]"></i>

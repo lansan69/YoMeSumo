@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core'; // Removed OnChanges, SimpleChanges
-import { Observable, BehaviorSubject, combineLatest, map } from 'rxjs';
-
+import { Component, inject, Input, OnDestroy, ChangeDetectorRef } from '@angular/core'; // Ensure OnDestroy is imported
+import { Observable, BehaviorSubject, combineLatest, map, Subscription } from 'rxjs';
 import { DatabaseService } from '../../services/database';
 import { Post, Association, User, PostApplicant } from '../../models/post.model';
 
@@ -12,20 +11,39 @@ import { Post, Association, User, PostApplicant } from '../../models/post.model'
   templateUrl: './main.html',
   styleUrl: './main.css',
 })
-export class Main {
+// FIX: Added 'implements OnDestroy' here
+export class Main implements OnDestroy {
   private dbService = inject(DatabaseService);
+  private cd = inject(ChangeDetectorRef);
+
+  // This Set is what makes the icons stay white (Persistent State)
   appliedPostIds = new Set<string>();
-  // --- 1. Inputs converted to Setters for Reactivity ---
-  
-  // Backing field for currentUser so we can access it in toggleFavorite
+
+  private appsSubscription: Subscription | undefined;
+
+  // Backing field
   private _currentUser: User | undefined;
   selectedPost: Post | null = null;
-  
+
+  // --- 1. THE LOGIC THAT LOADS PERSISTENT DATA ---
   @Input() set currentUser(val: User | undefined) {
     this._currentUser = val;
-    this.currentUser$.next(val); // <--- Updates pipeline immediately
-    console.log("Main Component received user:", val); 
+    this.currentUser$.next(val);
+
+    // Clean up old subscription
+    if (this.appsSubscription) {
+      this.appsSubscription.unsubscribe();
+    }
+
+    // If user is logged in, fetch their history immediately
+    if (val && val.uid) {
+      this.loadUserApplications(val.uid);
+    } else {
+      // If logged out, clear the white hands
+      this.appliedPostIds.clear();
+    }
   }
+
   get currentUser(): User | undefined {
     return this._currentUser;
   }
@@ -40,12 +58,10 @@ export class Main {
 
   @Input() category: string = '';
 
-  // 2. Subjects
   private searchTerm$ = new BehaviorSubject<string>('');
   private favDelimitation$ = new BehaviorSubject<boolean>(false);
   private currentUser$ = new BehaviorSubject<User | undefined>(undefined);
 
-  // 3. Raw Data
   private allPosts$ = this.dbService.getPosts();
   private allAssoc$ = this.dbService.getAssociations();
 
@@ -62,7 +78,6 @@ export class Main {
   }
 
   async toggleFavorite(post: Post) {
-    // Safety check using the getter
     if (!this.currentUser || !this.currentUser.uid || !post.id) {
       alert('Debes iniciar sesión para guardar favoritos');
       return;
@@ -74,10 +89,8 @@ export class Main {
     try {
       if (this.isFavorite(postId)) {
         await this.dbService.removeFromFavorites(userId, postId);
-        console.log('Removed from favorites');
       } else {
         await this.dbService.saveToFavorites(userId, postId);
-        console.log('Added to favorites');
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -85,52 +98,89 @@ export class Main {
   }
 
   async addApplicant(post: Post) {
-    // A. Validation
+    // 1. Validation
     if (!this.currentUser || !this.currentUser.uid || !post.id) {
       alert('Debes iniciar sesión para sumarte a una causa.');
       return;
     }
 
-    if (this.hasApplied(post.id)) {
-      alert('Ya te has postulado a esta iniciativa.');
-      return;
-    }
-
-    // B. Optional: Ask for a short message (Simple Prompt for now)
-    const message = prompt("¿Quieres dejar un mensaje al organizador?", "Hola, me gustaría apoyar en esta actividad.");
-    if (message === null) return; // User cancelled
-
     const userId = this.currentUser.uid;
     const postId = post.id;
 
-    // C. Create the Data Object based on your PostApplicant Model
+    // ======================================================
+    // CASE A: REMOVE APPLICATION (Un-apply)
+    // ======================================================
+    if (this.hasApplied(postId)) {
+      // Optional: Confirm with the user
+      const confirmDelete = confirm("¿Quieres cancelar tu postulación a esta iniciativa?");
+      if (!confirmDelete) return;
+
+      try {
+        await this.dbService.removeApplicant(postId, userId);
+
+        // Optimistic UI Update: Remove from Set immediately
+        this.appliedPostIds.delete(postId);
+        console.log('Postulación cancelada');
+      } catch (error) {
+        console.error('Error al cancelar:', error);
+      }
+      return; // Stop here
+    }
+
+    // ======================================================
+    // CASE B: ADD APPLICATION (Apply)
+    // ======================================================
+
+    const message = prompt("¿Quieres dejar un mensaje al organizador?", "Hola, me gustaría apoyar en esta actividad.");
+    if (message === null) return;
+
     const applicationData: PostApplicant = {
       uid: userId,
-      applicantId: userId, // Redundant but matches your model
+      applicantId: userId,
       postId: postId,
       helperName: this.currentUser.displayName || 'Usuario',
       helperPhone: this.currentUser.phone || '',
       helperEmail: this.currentUser.email || '',
       message: message,
       status: 'pending',
-      timestamp: null // The service adds serverTimestamp()
+      timestamp: null
     };
 
     try {
-      // D. Call Database Service
       await this.dbService.addApplicant(postId, userId, applicationData);
 
-      // E. Update UI immediately (Optimistic update)
+      // Optimistic UI Update: Add to Set immediately
       this.appliedPostIds.add(postId);
       console.log('Postulación exitosa');
-      console.log(this.appliedPostIds);
-
     } catch (error) {
       console.error('Error al postularse:', error);
-      alert('Hubo un error al intentar sumarte. Intenta de nuevo.');
+      alert('Hubo un error al intentar sumarte.');
     }
   }
 
+  // --- 2. THE FUNCTION THAT FETCHES FROM DB ---
+  loadUserApplications(userId: string) {
+    console.log("🔄 Loading applications for user:", userId); // Debug Log 1
+
+    this.appsSubscription = this.dbService.getUserApplications(userId).subscribe(
+      (apps) => {
+        // Clear and refill the Set
+        this.appliedPostIds.clear();
+
+        apps.forEach(app => {
+          if (app.postId) {
+            this.appliedPostIds.add(app.postId);
+          }
+        });
+
+        console.log("✅ Applications loaded:", this.appliedPostIds); // Debug Log 2
+
+        // 3. FORCE ANGULAR TO UPDATE THE VIEW
+        // This tells Angular: "I changed a Set variable, please repaint the HTML now"
+        this.cd.detectChanges();
+      }
+    );
+  }
   openPostDetails(post: Post) {
     this.selectedPost = post;
   }
@@ -138,7 +188,7 @@ export class Main {
   closePostDetails() {
     this.selectedPost = null;
   }
-  
+
   // --- Pipelines ---
 
   posts$: Observable<Post[]> = combineLatest([
@@ -150,18 +200,13 @@ export class Main {
     map(([posts, term, isFavMode, user]) => {
       let filtered = posts;
 
-      // Debugging log to see what the pipeline sees
-      if(isFavMode && !user) console.warn("Fav mode is ON but User is undefined in pipeline");
-
-      // A. FILTER BY FAVORITES
       if (isFavMode) {
         if (!user || !user.favorites) {
-          return []; // Mode is ON but user (or favs) missing -> Empty list
+          return [];
         }
         filtered = filtered.filter(p => p.id && user.favorites.includes(p.id));
       }
 
-      // B. FILTER BY SEARCH
       if (!term || term.trim() === '') return filtered;
 
       const lowerTerm = term.toLowerCase();
@@ -182,8 +227,8 @@ export class Main {
     this.favDelimitation$
   ]).pipe(
     map(([asoc, term, isFavMode]) => {
-      if (isFavMode) return []; // Hide associations in fav mode
-      
+      if (isFavMode) return [];
+
       if (!term || term.trim() === '') return asoc;
 
       const lowerTerm = term.toLowerCase();
@@ -194,5 +239,11 @@ export class Main {
         aso.categoria.toLowerCase().includes(lowerTerm)
       );
     })
-  )
+  );
+
+  ngOnDestroy() {
+    if (this.appsSubscription) {
+      this.appsSubscription.unsubscribe();
+    }
+  }
 }

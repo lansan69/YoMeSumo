@@ -1,27 +1,28 @@
-<div class="bg-brand-cream text-gray-800 font-sans overflow-hidden h-screen w-full relative flex">
+<div class="bg-brand-cream text-gray-800 font-sans overflow-hidden h-screen w-full relative flex flex-row">
 
     <div *ngIf="isSidebarOpen" (click)="isSidebarOpen = false"
-        class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden transition-opacity">
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 md:hidden transition-opacity">
     </div>
 
-    <div class="fixed inset-y-0 left-0 z-50 w-64 bg-brand-cream border-r border-brand-light shadow-2xl transform transition-transform duration-300 md:hidden"
+    <div class="fixed inset-y-0 left-0 z-[60] w-64 bg-brand-cream border-r border-brand-light shadow-2xl transform transition-transform duration-300 md:hidden"
         [class.-translate-x-full]="!isSidebarOpen" [class.translate-x-0]="isSidebarOpen">
         <app-aside (screenChange)="changeScreen($event); isSidebarOpen = false" (logout)="logOut()"
             (currentUsr)="getUser($event)" class="h-full block">
         </app-aside>
     </div>
 
-    <aside class="hidden md:block flex-none w-64 h-full z-20 border-r border-brand-light/20 bg-brand-cream/50">
+    <aside
+        class="hidden md:block flex-none w-64 h-full z-40 border-r border-brand-light shadow-lg bg-brand-cream relative">
         <app-aside (screenChange)="changeScreen($event)" (logout)="logOut()" (currentUsr)="getUser($event)"
-            class="h-full block">
+            class="h-full block w-full">
         </app-aside>
     </aside>
 
-    <main class="flex-1 flex flex-col h-full min-w-0 relative overflow-hidden">
+    <main class="flex-1 flex flex-col h-full min-w-0 relative overflow-hidden bg-brand-cream">
 
-        <div class="flex-1 flex flex-col h-full overflow-hidden" *ngIf="this.currentScreen == 'llamados'">
+        <div class="flex-1 flex flex-col h-full overflow-hidden relative" *ngIf="this.currentScreen == 'llamados'">
             <nav
-                class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm">
+                class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm border-b border-brand-light/20">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <button (click)="isSidebarOpen = !isSidebarOpen"
                         class="md:hidden p-2 text-brand-dark hover:bg-black/5 rounded-full shrink-0">
@@ -60,7 +61,7 @@
                     </div>
                 </div>
             </nav>
-            <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar relative z-0">
                 <app-main [searchterm]="getSearch()" [category]="getcategory()" [currentUser]="this.currentUser"
                     class="block w-full">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
@@ -68,54 +69,48 @@
                         <div class="h-96 rounded-2xl bg-brand-medium/30"></div>
                         <div class="h-72 rounded-2xl bg-brand-dark/20"></div>
                         <div class="h-80 rounded-2xl bg-white shadow-sm border border-brand-light"></div>
-                        <div class="h-60 rounded-2xl bg-brand-medium/30"></div>
-                        <div class="h-80 rounded-2xl bg-brand-light/40"></div>
                     </div>
                 </app-main>
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col h-full overflow-y-auto relative custom-scrollbar"
-            *ngIf="currentScreen === 'perfil'">
-
+        <div class="flex-1 flex flex-col h-full overflow-y-auto relative custom-scrollbar" *ngIf="currentScreen === 'perfil'">
+        
             <div class="md:hidden absolute top-4 left-4 z-30">
                 <button (click)="isSidebarOpen = !isSidebarOpen"
                     class="p-2 bg-white/80 backdrop-blur text-brand-dark shadow-sm hover:bg-white rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 6h16M4 12h16M4 18h16" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                 </button>
             </div>
-
+        
             <main
                 class="flex-grow p-4 md:p-8 flex flex-col items-start md:items-center justify-start md:justify-center min-h-full">
-
+        
                 <div class="max-w-5xl w-full pt-16 md:pt-0" *ngIf="currentUser">
-
+        
                     <section class="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-10">
                         <div class="flex-grow text-center md:text-left">
                             <h1 class="text-3xl md:text-4xl font-black text-gray-800 tracking-tight">
                                 {{ currentUser.displayName }}
                             </h1>
                             <p class="text-brand-dark font-medium mt-1 text-sm md:text-base">Activo desde el 2025</p>
-
+        
                             <button
                                 class="mt-4 text-xs font-bold text-brand-medium border-2 border-brand-medium px-6 py-2 rounded-full hover:bg-brand-medium hover:text-white transition-all shadow-sm active:scale-95">
                                 EDITAR MI HUELLA
                             </button>
                         </div>
-
-                        <div
-                            class="w-full md:w-64 bg-white p-5 rounded-3xl shadow-sm border border-brand-light/30 shrink-0">
+        
+                        <div class="w-full md:w-64 bg-white p-5 rounded-3xl shadow-sm border border-brand-light/30 shrink-0">
                             <div class="flex justify-between items-end mb-2">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nivel de
                                     Impacto</span>
                                 <span class="text-xs font-bold text-brand-dark">Nvl 2</span>
                             </div>
-                            <div
-                                class="w-full bg-brand-cream h-3 rounded-full overflow-hidden border border-brand-light">
+                            <div class="w-full bg-brand-cream h-3 rounded-full overflow-hidden border border-brand-light">
                                 <div class="bg-brand-medium h-full rounded-full transition-all duration-1000"
                                     style="width: 65%"></div>
                             </div>
@@ -123,7 +118,7 @@
                             </p>
                         </div>
                     </section>
-
+        
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8">
                         <div
                             class="bg-white p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-sm border border-gray-50 flex flex-col justify-between hover:shadow-md transition-shadow">
@@ -137,8 +132,8 @@
                                         <div class="bg-brand-cream p-2 rounded-lg shrink-0">
                                             <i data-lucide="phone" class="w-4 h-4 text-brand-medium"></i>
                                         </div>
-                                        <span class="text-sm font-medium break-all">{{ currentUser.phone || 'Sin
-                                            teléfono' }}</span>
+                                        <span class="text-sm font-medium break-all">{{ currentUser.phone || 'Sin teléfono'
+                                            }}</span>
                                     </div>
                                     <div class="flex items-center gap-4 text-gray-600">
                                         <div class="bg-brand-cream p-2 rounded-lg shrink-0">
@@ -149,15 +144,14 @@
                                 </div>
                             </div>
                             <div class="bg-brand-cream/40 p-5 rounded-2xl">
-                                <h4 class="font-bold mb-2 text-brand-dark text-[10px] uppercase tracking-wider">Sobre mí
-                                </h4>
+                                <h4 class="font-bold mb-2 text-brand-dark text-[10px] uppercase tracking-wider"> Sobre mí</h4>
                                 <p class="text-xs text-gray-500 leading-relaxed italic">
                                     "Me apasiona colaborar en albergues de animales y asilos. Siempre busco un espacio
                                     para sumar mis manos."
                                 </p>
                             </div>
                         </div>
-
+        
                         <div
                             class="bg-white p-6 md:p-8 rounded-[30px] md:rounded-[40px] shadow-sm border border-gray-50 flex flex-col items-center">
                             <h3 class="font-bold mb-8 text-brand-dark uppercase tracking-widest text-[11px]">Insignias
@@ -198,7 +192,7 @@
                                     + ' más para ser Héroe!' : '¡Eres un Héroe de la comunidad!' }} </p>
                         </div>
                     </div>
-
+        
                     <section
                         class="bg-brand-cream p-6 md:p-10 rounded-[30px] md:rounded-[45px] border-b-8 border-brand-light shadow-inner relative overflow-hidden">
                         <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-8">
@@ -206,8 +200,8 @@
                                 <h2 class="text-xl md:text-2xl font-black text-brand-dark mb-2">Tu Impacto en YoMeSumo
                                 </h2>
                                 <p class="text-sm text-gray-600 leading-relaxed max-w-2xl">
-                                    ¡Has hecho un trabajo fenomenal! Tienes <span
-                                        class="font-bold text-brand-medium text-lg">{{ currentUser.favorites.length
+                                    ¡Has hecho un trabajo fenomenal! Tienes <span class="font-bold text-brand-medium text-lg">{{
+                                        currentUser.favorites.length
                                         }}</span> publicaciones guardadas que te importan.
                                 </p>
                             </div>
@@ -215,21 +209,20 @@
                                 class="bg-white px-8 py-5 rounded-[30px] text-center border-2 border-brand-light flex-shrink-0 shadow-sm">
                                 <span class="block text-4xl font-black text-brand-medium">{{
                                     currentUser.favorites.length }}</span>
-                                <span
-                                    class="text-[10px] font-black uppercase text-brand-dark tracking-[0.2em]">Favoritos</span>
+                                <span class="text-[10px] font-black uppercase text-brand-dark tracking-[0.2em]">Favoritos</span>
                             </div>
                         </div>
                         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-brand-light/30 rounded-full blur-3xl">
                         </div>
                     </section>
-
+        
                 </div>
             </main>
         </div>
 
-        <div class="flex-1 flex flex-col h-full overflow-hidden" *ngIf="this.currentScreen == 'favoritos'">
+        <div class="flex-1 flex flex-col h-full overflow-hidden relative" *ngIf="this.currentScreen == 'favoritos'">
             <nav
-                class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm">
+                class="sticky top-0 z-30 w-full bg-brand-cream/95 backdrop-blur-sm px-4 py-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shadow-sm border-b border-brand-light/20">
                 <div class="flex items-center gap-3 w-full sm:w-auto">
                     <button (click)="isSidebarOpen = !isSidebarOpen"
                         class="md:hidden p-2 text-brand-dark hover:bg-black/5 rounded-full shrink-0">
@@ -268,23 +261,28 @@
                     </div>
                 </div>
             </nav>
-            <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar relative z-0">
                 <app-main [favDelimitation]='true' [searchterm]="getSearch()" [category]="getcategory()"
                     [currentUser]="this.currentUser" class="block w-full">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-20">
-                        <div class="h-64 rounded-2xl bg-brand-light/40"></div>
-                        <div class="h-96 rounded-2xl bg-brand-medium/30"></div>
-                        <div class="h-72 rounded-2xl bg-brand-dark/20"></div>
-                        <div class="h-80 rounded-2xl bg-white shadow-sm border border-brand-light"></div>
-                        <div class="h-60 rounded-2xl bg-brand-medium/30"></div>
-                        <div class="h-80 rounded-2xl bg-brand-light/40"></div>
-                    </div>
                 </app-main>
             </div>
         </div>
 
-        <div class="contador flex-1 overflow-y-auto" *ngIf="this.currentScreen == 'contador'">
-            in contador
+        <div class="flex-1 flex flex-col h-full overflow-y-auto relative custom-scrollbar"
+            *ngIf="this.currentScreen == 'contador'">
+            <div class="md:hidden absolute top-4 left-4 z-30">
+                <button (click)="isSidebarOpen = !isSidebarOpen"
+                    class="p-2 bg-white/80 backdrop-blur text-brand-dark shadow-sm hover:bg-white rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+            <main class="flex-grow p-4 md:p-8">
+                In Contador
+            </main>
         </div>
 
     </main>

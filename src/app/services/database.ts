@@ -14,7 +14,9 @@ import {
   arrayRemove,
   query,
   where,
-  increment // <--- Added this for applicantsCount
+  increment, // <--- Added this for applicantsCount
+  getDocs, 
+  limit
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -76,7 +78,7 @@ export class DatabaseService {
       favorites: arrayRemove(postId)
     });
   }
-  
+
   async saveToFavorites(uid: string, postId: string): Promise<void> {
     const userRef = doc(this.firestore, `users/${uid}`);
 
@@ -157,61 +159,102 @@ export class DatabaseService {
   }
 
   // =================================================================
-  // 4. APPLICANTS (Sub-collection: 'posts/{postId}/applicants')
+  // 4. APPLICANTS (Root Collection: 'applicants')
   // =================================================================
 
+  // 1. ADD APPLICANT (Already updated by you, included for completeness)
   async addApplicant(postId: string, userId: string, applicationData: any) {
-    const applicantRef = doc(this.firestore, `applicants/${userId}`);
+    const applicantsCol = collection(this.firestore, 'applicants');
     const postRef = doc(this.firestore, `posts/${postId}`);
 
-    // 1. Add the applicant document
-    await setDoc(applicantRef, {
+    // Use addDoc for Random ID
+    await addDoc(applicantsCol, {
       ...applicationData,
       status: 'pending',
       timestamp: serverTimestamp()
     });
 
-    // 2. Atomically increment the applicantsCount on the main Post
+    // Increment counter
     await updateDoc(postRef, {
       applicantsCount: increment(1)
     });
   }
 
-  getApplicants(postId: string): Observable<PostApplicant[]> {
-    const applicantsRef = collection(this.firestore, `posts/${postId}/applicants`);
-    // Using 'uid' here assuming the document ID is the User ID
-    return collectionData(applicantsRef, { idField: 'uid' }) as Observable<PostApplicant[]>;
+  async removeApplicant(postId: string, userId: string) {
+    const applicantsRef = collection(this.firestore, 'applicants');
+    const postRef = doc(this.firestore, `posts/${postId}`);
+
+    // 1. Find the specific document to delete
+    // We query for the application matching this Post AND this User
+    const q = query(
+      applicantsRef,
+      where('postId', '==', postId),
+      where('uid', '==', userId),
+      limit(1)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      const docToDelete = snapshot.docs[0];
+
+      // 2. Delete the application document
+      await deleteDoc(docToDelete.ref);
+
+      // 3. Decrement the counter on the Post
+      await updateDoc(postRef, {
+        applicantsCount: increment(-1)
+      });
+    }
   }
 
+  // 2. GET APPLICANTS FOR A SPECIFIC POST
+  // (Used by the Post Author to see who applied)
+  getApplicantsByPostId(postId: string): Observable<PostApplicant[]> {
+    const applicantsRef = collection(this.firestore, 'applicants');
+
+    // Query: "Give me all documents in 'applicants' where postId matches"
+    const q = query(applicantsRef, where('postId', '==', postId));
+
+    // We map the random document ID to 'applicationId' field so we can use it to update status later
+    return collectionData(q, { idField: 'applicationId' }) as Observable<PostApplicant[]>;
+  }
+
+  // 3. GET APPLICATIONS MADE BY A USER
+  // (Used to color the hand icon white & show "My Applications" list)
+  getUserApplications(userId: string): Observable<PostApplicant[]> {
+    const applicantsRef = collection(this.firestore, 'applicants');
+
+    // Query: "Give me all documents where uid matches the current user"
+    const q = query(applicantsRef, where('uid', '==', userId));
+
+    return collectionData(q, { idField: 'applicationId' }) as Observable<PostApplicant[]>;
+  }
+
+  // 4. CHECK SPECIFIC STATUS (Single Application)
+  // We can't use doc() directly anymore because we don't know the Random ID.
+  // We must query for it.
+  getApplicationStatus(postId: string, userId: string): Observable<PostApplicant | undefined> {
+    const applicantsRef = collection(this.firestore, 'applicants');
+
+    const q = query(
+      applicantsRef,
+      where('postId', '==', postId),
+      where('uid', '==', userId)
+    );
+
+    return collectionData(q, { idField: 'applicationId' }).pipe(
+      map(apps => apps.length > 0 ? (apps[0] as PostApplicant) : undefined)
+    );
+  }
+
+  // 5. UPDATE STATUS
+  // applicantId here refers to the RANDOM DOCUMENT ID (e.g., "7d8s9a..."), not the User ID.
   updateApplicantStatus(applicantId: string, status: 'accepted' | 'rejected' | 'completed') {
-    // We target the 'applicants' collection because that is where we read the data from
     const applicantRef = doc(this.firestore, `applicants/${applicantId}`);
     return updateDoc(applicantRef, { status });
   }
 
-  getApplicationStatus(postId: string, userId: string): Observable<PostApplicant | undefined> {
-    const applicantRef = doc(this.firestore, `posts/${postId}/applicants/${userId}`);
-    return docData(applicantRef) as Observable<PostApplicant>;
-  }
-
-  getApplicantsByPostId(postId: string): Observable<PostApplicant[]> {
-    const applicantsRef = collection(this.firestore, 'applicants');
-    const q = query(applicantsRef, where('postId', '==', postId));
-    return collectionData(q, { idField: 'applicantId' }) as Observable<PostApplicant[]>;
-  }
-
-  getApplicationsByUser(userId: string): Observable<any[]> {
-    const ref = collection(this.firestore, 'applicants'); // Or collectionGroup if subcollection
-    // Note: Since your structure is posts/{id}/applicants/{uid}, querying all applications 
-    // for a user efficiently requires a Collection Group Index in Firestore.
-    // For now, we will assume you have a way to get them, or we use the 'applicants' collection strategy.
-
-    // *Simple Alternative for Client-Side visual check:*
-    // If you don't have a collectionGroup query set up, the visual check might need 
-    // to happen differently. Assuming you have the method from the previous step:
-    const q = query(collectionGroup(this.firestore, 'applicants'), where('uid', '==', userId));
-    return collectionData(q, { idField: 'applicantId' });
-  }
 
   // =================================================================
   // 5. FAVORITES (Array operations on User document)
