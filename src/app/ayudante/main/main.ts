@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, OnDestroy, ChangeDetectorRef } from '@angular/core'; // Ensure OnDestroy is imported
+import { Component, inject, Input, OnDestroy, ChangeDetectorRef } from '@angular/core'; 
 import { Observable, BehaviorSubject, combineLatest, map, Subscription } from 'rxjs';
 import { DatabaseService } from '../../services/database';
 import { Post, Association, User, PostApplicant } from '../../models/post.model';
+
+// Declaración de iziToast
+declare var iziToast: any;
 
 @Component({
   selector: 'app-main',
@@ -11,7 +14,6 @@ import { Post, Association, User, PostApplicant } from '../../models/post.model'
   templateUrl: './main.html',
   styleUrl: './main.css',
 })
-// FIX: Added 'implements OnDestroy' here
 export class Main implements OnDestroy {
   private dbService = inject(DatabaseService);
   private cd = inject(ChangeDetectorRef);
@@ -79,7 +81,12 @@ export class Main implements OnDestroy {
 
   async toggleFavorite(post: Post) {
     if (!this.currentUser || !this.currentUser.uid || !post.id) {
-      alert('Debes iniciar sesión para guardar favoritos');
+      // REEMPLAZO ALERT -> WARNING
+      iziToast.warning({
+        title: 'Atención',
+        message: 'Debes iniciar sesión para guardar favoritos',
+        position: 'center'
+      });
       return;
     }
 
@@ -89,8 +96,20 @@ export class Main implements OnDestroy {
     try {
       if (this.isFavorite(postId)) {
         await this.dbService.removeFromFavorites(userId, postId);
+        iziToast.info({
+            title: 'Eliminado',
+            message: 'Eliminado de tus favoritos',
+            position: 'bottomRight',
+            timeout: 2000
+        });
       } else {
         await this.dbService.saveToFavorites(userId, postId);
+        iziToast.success({
+            title: 'Guardado',
+            message: 'Añadido a tus favoritos',
+            position: 'bottomRight',
+            timeout: 2000
+        });
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
@@ -100,7 +119,11 @@ export class Main implements OnDestroy {
   async addApplicant(post: Post) {
     // 1. Validation
     if (!this.currentUser || !this.currentUser.uid || !post.id) {
-      alert('Debes iniciar sesión para sumarte a una causa.');
+      iziToast.warning({
+        title: 'Atención',
+        message: 'Debes iniciar sesión para sumarte a una causa.',
+        position: 'center'
+      });
       return;
     }
 
@@ -111,60 +134,111 @@ export class Main implements OnDestroy {
     // CASE A: REMOVE APPLICATION (Un-apply)
     // ======================================================
     if (this.hasApplied(postId)) {
-      // Optional: Confirm with the user
-      const confirmDelete = confirm("¿Quieres cancelar tu postulación a esta iniciativa?");
-      if (!confirmDelete) return;
+      
+      // REEMPLAZO CONFIRM -> QUESTION
+      iziToast.question({
+        timeout: 20000,
+        close: false,
+        overlay: true,
+        displayMode: 'once',
+        id: 'question',
+        zindex: 999,
+        title: 'Cancelar',
+        message: '¿Quieres cancelar tu postulación a esta iniciativa?',
+        position: 'center',
+        buttons: [
+          ['<button><b>SÍ, CANCELAR</b></button>', async (instance: any, toast: any) => {
+            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+            
+            try {
+              await this.dbService.removeApplicant(postId, userId);
+              this.appliedPostIds.delete(postId);
+              
+              iziToast.success({
+                title: 'Cancelado',
+                message: 'Ya no estás postulado a esta causa.',
+              });
+            } catch (error) {
+              console.error('Error al cancelar:', error);
+            }
 
-      try {
-        await this.dbService.removeApplicant(postId, userId);
-
-        // Optimistic UI Update: Remove from Set immediately
-        this.appliedPostIds.delete(postId);
-        console.log('Postulación cancelada');
-      } catch (error) {
-        console.error('Error al cancelar:', error);
-      }
-      return; // Stop here
+          }, true],
+          ['<button>NO</button>', (instance: any, toast: any) => {
+            instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          }]
+        ]
+      });
+      return; 
     }
 
     // ======================================================
     // CASE B: ADD APPLICATION (Apply)
     // ======================================================
 
-    const message = prompt("¿Quieres dejar un mensaje al organizador?", "Hola, me gustaría apoyar en esta actividad.");
-    if (message === null) return;
+    // REEMPLAZO PROMPT -> IZITOAST CON INPUT
+    iziToast.show({
+        theme: 'light',
+        icon: 'icon-person',
+        title: 'Mensaje al Organizador',
+        message: 'Deja un mensaje opcional:',
+        position: 'center',
+        overlay: true,
+        timeout: false, // No se cierra solo
+        close: true,
+        inputs: [
+            ['<input type="text" placeholder="Hola, me gustaría apoyar...">', 'keyup', function (instance: any, toast: any, input: any, e: any) {
+                // No action needed on keyup
+            }, true] // true = focus
+        ],
+        buttons: [
+            ['<button><b>ENVIAR</b></button>', async (instance: any, toast: any, button: any, e: any, inputs: any) => {
+                
+                // Obtener valor del input (inputs[0].value)
+                const message = inputs[0].value || "Hola, me gustaría apoyar en esta actividad.";
+                instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
 
-    const applicationData: PostApplicant = {
-      uid: userId,
-      applicantId: userId,
-      postId: postId,
-      helperName: this.currentUser.displayName || 'Usuario',
-      helperPhone: this.currentUser.phone || '',
-      helperEmail: this.currentUser.email || '',
-      message: message,
-      status: 'pending',
-      timestamp: null
-    };
+                // Procesar envío
+                const applicationData: PostApplicant = {
+                    uid: userId,
+                    applicantId: userId,
+                    postId: postId,
+                    helperName: this.currentUser!.displayName || 'Usuario',
+                    helperPhone: this.currentUser!.phone || '',
+                    helperEmail: this.currentUser!.email || '',
+                    message: message,
+                    status: 'pending',
+                    timestamp: null
+                };
 
-    try {
-      await this.dbService.addApplicant(postId, userId, applicationData);
-
-      // Optimistic UI Update: Add to Set immediately
-      this.appliedPostIds.add(postId);
-      console.log('Postulación exitosa');
-    } catch (error) {
-      console.error('Error al postularse:', error);
-      alert('Hubo un error al intentar sumarte.');
-    }
+                try {
+                    await this.dbService.addApplicant(postId, userId, applicationData);
+                    this.appliedPostIds.add(postId);
+                    
+                    iziToast.success({
+                        title: '¡Te sumaste!',
+                        message: 'Tu solicitud ha sido enviada.',
+                    });
+                } catch (error) {
+                    console.error('Error al postularse:', error);
+                    iziToast.error({
+                        title: 'Error',
+                        message: 'Hubo un error al intentar sumarte.',
+                    });
+                }
+            }],
+            ['<button>CANCELAR</button>', (instance: any, toast: any) => {
+                instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+            }]
+        ]
+    });
   }
 
   // --- 2. THE FUNCTION THAT FETCHES FROM DB ---
   loadUserApplications(userId: string) {
-    console.log("🔄 Loading applications for user:", userId); // Debug Log 1
+    console.log("🔄 Loading applications for user:", userId);
 
     this.appsSubscription = this.dbService.getUserApplications(userId).subscribe(
       (apps) => {
-        // Clear and refill the Set
         this.appliedPostIds.clear();
 
         apps.forEach(app => {
@@ -173,10 +247,7 @@ export class Main implements OnDestroy {
           }
         });
 
-        console.log("✅ Applications loaded:", this.appliedPostIds); // Debug Log 2
-
-        // 3. FORCE ANGULAR TO UPDATE THE VIEW
-        // This tells Angular: "I changed a Set variable, please repaint the HTML now"
+        console.log("✅ Applications loaded:", this.appliedPostIds);
         this.cd.detectChanges();
       }
     );

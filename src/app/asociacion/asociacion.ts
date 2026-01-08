@@ -1,13 +1,16 @@
-import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, NgZone, ViewEncapsulation } from '@angular/core'; import { CommonModule } from '@angular/common';
+import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, NgZone, ViewEncapsulation } from '@angular/core'; 
+import { CommonModule } from '@angular/common';
 import { Aside } from './aside/aside';
 import { Main } from './main/main';
 import { DatabaseService } from '../services/database';
 import { Association, Post, PostApplicant } from '../models/post.model';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 declare var lucide: any;
 declare var google: any;
+declare var iziToast: any; // Declaramos iziToast
 
 @Component({
   selector: 'app-asociacion',
@@ -25,7 +28,26 @@ export class Asociacion implements OnInit {
 
   ngOnInit(): void {
     this.refreshIcons();
+    
+    // Configuración Global de iziToast (Mismo estilo que Ayudante)
+    if (typeof iziToast !== 'undefined') {
+      iziToast.settings({
+        timeout: 4000,
+        resetOnHover: true,
+        transitionIn: 'flipInX',
+        transitionOut: 'flipOutX',
+        position: 'topRight',
+        theme: 'light',
+        progressBarColor: '#ADC2A9',
+        imageWidth: 50,
+        layout: 2,
+        balloon: false,
+        close: true,
+        closeOnEscape: true,
+      });
+    }
   }
+  
   ngAfterViewInit(): void {
     this.initAutocomplete();
   }
@@ -58,7 +80,66 @@ export class Asociacion implements OnInit {
   getSearch() { return this.searchTerm; }
   getcategory() { return this.searchCategory; }
 
-  // asociacion.ts
+  // --- BLOQUE DE EDICIÓN DE PERFIL ---
+  isEditingAssociation: boolean = false;
+
+  toggleEdit() {
+    this.isEditingAssociation = !this.isEditingAssociation;
+  }
+
+  saveAssociationData() {
+    if (!this.currentAssociation || !this.currentAssociation.id) return;
+
+    console.log("Iniciando validación de datos...");
+    const emailToCheck = this.currentAssociation.email.trim();
+
+    // 1. VALIDACIÓN DE CORREO
+    forkJoin({
+      userCheck: this.dbService.getUserByEmail(emailToCheck).pipe(take(1)),
+      assocCheck: this.dbService.getAssociationByEmail(emailToCheck).pipe(take(1))
+    }).subscribe(async (results) => {
+      
+      const userExists = results.userCheck;
+      const assocExists = results.assocCheck;
+
+      if (userExists || (assocExists && assocExists.id !== this.currentAssociation!.id)) {
+        
+        // REEMPLAZO ALERT -> IZITOAST ERROR
+        iziToast.error({
+          title: 'Error de Correo',
+          message: 'El correo electrónico ya está registrado en otra cuenta.',
+          position: 'center'
+        });
+        return; 
+
+      } else {
+        const datosActualizados = {
+          encargado: this.currentAssociation!.encargado,
+          phone: this.currentAssociation!.phone,
+          description: this.currentAssociation!.description,
+          email: emailToCheck 
+        };
+
+        console.log("Correo válido. Guardando cambios...", datosActualizados);
+
+        try {
+          await this.dbService.updateAssociation(this.currentAssociation!.id, datosActualizados);
+          
+          // REEMPLAZO CONSOLE.LOG -> IZITOAST SUCCESS
+          iziToast.success({
+            title: '¡Actualizado!',
+            message: 'La información de la asociación se guardó correctamente.',
+          });
+          
+          this.isEditingAssociation = false;
+        } catch (error) {
+          console.error('Error al actualizar asociación:', error);
+          iziToast.error({ title: 'Error', message: 'No se pudieron guardar los cambios.' });
+        }
+      }
+    });
+  }
+  // -----------------------------------
 
   changeScreen(event: string) {
     this.currentScreen = event;
@@ -77,7 +158,6 @@ export class Asociacion implements OnInit {
 
   getPendingCount(postId: string): number {
     const applicants = this.postApplicants[postId] || [];
-    // Count only pending or rejected (since those are the ones shown in Publicaciones)
     return applicants.filter(a => a.status !== 'accepted').length;
   }
 
@@ -89,7 +169,6 @@ export class Asociacion implements OnInit {
         this.myPosts.forEach(post => {
           if (post.id) this.loadApplicantsForPost(post.id);
         });
-
         this.refreshIcons();
       },
       error: (err) => console.error('Error loading posts:', err)
@@ -99,13 +178,10 @@ export class Asociacion implements OnInit {
   loadApplicantsForPost(postId: string) {
     this.dbService.getApplicantsByPostId(postId).subscribe({
       next: (applicants) => {
-        // Create a new object reference so Angular detects the change
         this.postApplicants = {
           ...this.postApplicants,
           [postId]: applicants
         };
-
-        // <--- CRITICAL FIX: Manually trigger update when sub-data arrives
         this.cdr.detectChanges();
         this.refreshIcons();
       }
@@ -114,20 +190,14 @@ export class Asociacion implements OnInit {
 
   async updateApplicantStatus(applicant: PostApplicant, newStatus: 'accepted' | 'rejected') {
     if (!applicant.applicantId) return;
-
     try {
       await this.dbService.updateApplicantStatus(applicant.applicantId, newStatus);
-      // The subscription in loadApplicantsForPost will catch the update automatically
-      // and trigger the detectChanges() we added above.
     } catch (error) {
       console.error('Error updating status:', error);
     }
   }
 
-  // Helper to refresh icons safely
   refreshIcons() {
-    // Use NgZone to run this outside Angular to prevent infinite loops, 
-    // but ensure it runs after the current JS tick.
     this.ngZone.runOutsideAngular(() => {
       setTimeout(() => {
         if (typeof lucide !== 'undefined') {
@@ -137,7 +207,6 @@ export class Asociacion implements OnInit {
     });
   }
 
-  // Helpers
   getWhatsappLink(phone: string, postTitle: string): string {
     const text = `Hola, vi tu solicitud para sumarte a "${postTitle}".`;
     return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
@@ -152,7 +221,7 @@ export class Asociacion implements OnInit {
     } else {
       this.openPostIds.add(postId);
     }
-    this.refreshIcons(); // Refresh icons when opening accordion
+    this.refreshIcons();
   }
 
   isPostOpen(postId: string | undefined): boolean {
@@ -160,163 +229,177 @@ export class Asociacion implements OnInit {
   }
 
   logOut() {
-    // Remove the ID so the user is effectively logged out
     localStorage.removeItem('userid');
-    console.log('User logged out, ID removed.');
-
-    // Emit the event so the parent component (App) knows to change the view
     this.logout.emit();
-    console.log("logging out");
   }
 
   async completeCitation(applicant: PostApplicant) {
     if (!applicant.applicantId) return;
+    
+    // REEMPLAZO CONFIRM -> QUESTION
+    iziToast.question({
+      timeout: 20000,
+      close: false,
+      overlay: true,
+      displayMode: 'once',
+      id: 'question',
+      zindex: 999,
+      title: 'Finalizar',
+      message: '¿Marcar esta cita como completada?',
+      position: 'center',
+      buttons: [
+        ['<button><b>SÍ</b></button>', async (instance: any, toast: any) => {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          
+          try {
+            await this.dbService.updateApplicantStatus(applicant.applicantId!, 'completed');
+            iziToast.success({ title: 'Completado', message: 'Cita marcada como exitosa.' });
+          } catch (error) {
+            console.error('Error completing citation:', error);
+            iziToast.error({ title: 'Error', message: 'No se pudo actualizar el estado.' });
+          }
 
-    // We reuse the existing update method, just passing 'completed'
-    // Ensure your service method allows string or the specific union type
-    try {
-      await this.dbService.updateApplicantStatus(applicant.applicantId, 'completed');
-      // The view will automatically update and remove this card because 
-      // the filter looks for 'accepted' only.
-    } catch (error) {
-      console.error('Error completing citation:', error);
-    }
+        }, true],
+        ['<button>NO</button>', (instance: any, toast: any) => {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }]
+      ]
+    });
   }
 
-  // 4. NEW: Method to Create the Post
   async createNewPost() {
     if (!this.currentAssociation || !this.currentAssociation.id) {
       console.error('No association logged in');
       return;
     }
-
-    // Basic Validation
     if (!this.newPostForm.title || !this.newPostForm.description) {
-      alert('Por favor completa el título y la descripción');
+      iziToast.warning({
+        title: 'Faltan datos',
+        message: 'Por favor completa el título y la descripción.',
+        position: 'center'
+      });
       return;
     }
 
-    // Prepare the object for the DB
     const postData: Partial<Post> = {
       authorId: this.currentAssociation.id,
       authorName: this.currentAssociation.nameAssociation,
-      type: 'request', // Defaulting to 'request' based on your template context
+      type: 'request',
       title: this.newPostForm.title,
       description: this.newPostForm.description,
-      // Convert string "tape, boxes" -> array ["tape", "boxes"]
       suppliesList: this.newPostForm.supplies.split(',').map(s => s.trim()).filter(s => s !== ''),
       location: {
         address: this.newPostForm.location,
-        lat: this.currentAssociation.location.lat, // Fallback to association location
-        lng: this.currentAssociation.location.lng  // Fallback to association location
+        lat: this.currentAssociation.location.lat,
+        lng: this.currentAssociation.location.lng
       },
-      schedule: 'Por coordinar', // Default value
+      schedule: 'Por coordinar',
       status: 'open',
       applicantsCount: 0
     };
 
     try {
       await this.dbService.createPost(postData);
-      console.log('Post created successfully');
+      
+      iziToast.success({
+        title: 'Publicado',
+        message: 'Tu Eco ha sido lanzado exitosamente.',
+      });
 
-      // Reset Form
       this.newPostForm = { title: '', description: '', supplies: '', location: '' };
-
-      // Close Modal
       this.closeEcoModal();
       this.refreshIcons();
-
-      // Refresh view logic will trigger automatically via subscription
     } catch (error) {
       console.error('Error creating post:', error);
+      iziToast.error({ title: 'Error', message: 'No se pudo crear la publicación.' });
     }
   }
 
-  /**
-     * Accepts the applicant:
-     * 1. Updates Firestore status to 'accepted'
-     * 2. Updates local view to remove the card from 'pending' list
-     */
   async acceptApplicant(applicantId: string) {
     try {
       await this.dbService.updateApplicantStatus(applicantId, 'accepted');
       this.updateLocalApplicantStatus(applicantId, 'accepted');
-      console.log(`Applicant ${applicantId} accepted successfully.`);
+      
+      iziToast.success({
+        title: '¡Aceptado!',
+        message: 'Has aceptado al sumador. ¡Ponte en contacto!',
+        timeout: 5000
+      });
+
     } catch (error) {
       console.error('Error accepting applicant:', error);
-      alert('Hubo un error al aceptar la solicitud.');
+      iziToast.error({ title: 'Error', message: 'Hubo un problema al aceptar.' });
     }
   }
 
-  /**
-   * Rejects the applicant:
-   * 1. Asks for confirmation
-   * 2. Updates Firestore status to 'rejected'
-   * 3. Updates local view to remove the card
-   */
   async rejectApplicant(applicantId: string) {
-    const confirmReject = confirm('¿Estás seguro de que deseas rechazar a este sumador?');
-    if (!confirmReject) return;
+    
+    // REEMPLAZO CONFIRM -> QUESTION
+    iziToast.question({
+      timeout: 20000,
+      close: false,
+      overlay: true,
+      displayMode: 'once',
+      id: 'question',
+      zindex: 999,
+      title: 'Rechazar',
+      message: '¿Seguro que deseas rechazar a este sumador?',
+      position: 'center',
+      buttons: [
+        ['<button><b>SÍ, RECHAZAR</b></button>', async (instance: any, toast: any) => {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          
+          try {
+            await this.dbService.updateApplicantStatus(applicantId, 'rejected');
+            this.updateLocalApplicantStatus(applicantId, 'rejected');
+            iziToast.info({ title: 'Rechazado', message: 'Solicitud rechazada.' });
+          } catch (error) {
+            console.error('Error rejecting applicant:', error);
+            iziToast.error({ title: 'Error', message: 'No se pudo procesar el rechazo.' });
+          }
 
-    try {
-      await this.dbService.updateApplicantStatus(applicantId, 'rejected');
-      this.updateLocalApplicantStatus(applicantId, 'rejected');
-      console.log(`Applicant ${applicantId} rejected successfully.`);
-    } catch (error) {
-      console.error('Error rejecting applicant:', error);
-      alert('Hubo un error al rechazar la solicitud.');
-    }
+        }, true],
+        ['<button>CANCELAR</button>', (instance: any, toast: any) => {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }]
+      ]
+    });
   }
 
-  /**
-   * Helper function to update the local 'postApplicants' array.
-   * This forces the UI to update immediately (hiding the card via *ngIf)
-   * without waiting for a page reload.
-   */
   private updateLocalApplicantStatus(applicantId: string, newStatus: 'pending' | 'accepted' | 'rejected' | 'completed') {
-    // Iterate through all posts in the dictionary
     for (const postId in this.postApplicants) {
       if (this.postApplicants.hasOwnProperty(postId)) {
-        // Find the applicant in the specific post's array
         const applicantIndex = this.postApplicants[postId].findIndex(app => app.applicantId === applicantId);
-
         if (applicantIndex !== -1) {
-          // Update the status locally
           this.postApplicants[postId][applicantIndex].status = newStatus;
-          // Since the HTML uses *ngIf="applicant.status === 'pending'", 
-          // changing it to 'accepted' or 'rejected' will hide it from the list.
           break;
         }
       }
     }
   }
-  // 4. GOOGLE MAPS LOGIC
+
   initAutocomplete() {
     if (typeof google === 'undefined' || !google.maps || !google.maps.places) {
       console.warn("Google Maps API not loaded yet. Retrying in 500ms...");
       setTimeout(() => this.initAutocomplete(), 500);
       return;
     }
-
     if (!this.addressInput || !this.addressInput.nativeElement) {
       console.warn("Address Input not found in DOM.");
       return;
     }
-
     const autocomplete = new google.maps.places.Autocomplete(this.addressInput.nativeElement, {
       componentRestrictions: { country: 'mx' },
       fields: ['geometry', 'formatted_address'],
       types: ['address'],
     });
-
     autocomplete.addListener('place_changed', () => {
       this.ngZone.run(() => {
         const place = autocomplete.getPlace();
         if (!place.geometry || !place.geometry.location) {
-          window.alert("No details available for input: '" + place.name + "'");
+          iziToast.warning({ title: 'Ubicación', message: 'No se encontraron detalles para esa dirección.' });
           return;
         }
-
         this.newPostForm.location = place.formatted_address;
         this.selectedCoordinates = {
           lat: place.geometry.location.lat(),
@@ -328,29 +411,49 @@ export class Asociacion implements OnInit {
   }
 
   showCreateModal = false;
-
   openEcoModal() {
     this.showCreateModal = true;
-    // Delay ensures modal DOM is rendered (removing 'hidden' class) before Maps attaches
     setTimeout(() => {
       this.initAutocomplete();
     }, 100);
   }
 
   async deletePost(postId: string) {
-    const confirmed = confirm("¿Estás seguro de que deseas eliminar esta publicación? Esta acción no se puede deshacer.");
-    if (!confirmed) return;
+    
+    // REEMPLAZO CONFIRM -> QUESTION
+    iziToast.question({
+      timeout: 20000,
+      close: false,
+      overlay: true,
+      displayMode: 'once',
+      id: 'question',
+      zindex: 999,
+      title: 'Eliminar',
+      message: '¿Eliminar esta publicación? Esta acción no se puede deshacer.',
+      position: 'center',
+      color: 'red', // Color de advertencia
+      buttons: [
+        ['<button><b>ELIMINAR</b></button>', async (instance: any, toast: any) => {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+          
+          try {
+            await this.dbService.deletePost(postId);
+            this.myPosts = this.myPosts.filter(post => post.id !== postId);
+            delete this.postApplicants[postId];
+            this.openPostIds.delete(postId);
+            
+            iziToast.success({ title: 'Eliminado', message: 'Publicación eliminada correctamente.' });
+          } catch (error) {
+            console.error('Error eliminating post:', error);
+            iziToast.error({ title: 'Error', message: 'No se pudo eliminar la publicación.' });
+          }
 
-    try {
-      await this.dbService.deletePost(postId);
-      this.myPosts = this.myPosts.filter(post => post.id !== postId);
-      delete this.postApplicants[postId];
-      this.openPostIds.delete(postId);
-      console.log('Post eliminated successfully');
-    } catch (error) {
-      console.error('Error eliminating post:', error);
-      alert('Hubo un error al intentar eliminar la publicación.');
-    }
+        }, true],
+        ['<button>CANCELAR</button>', (instance: any, toast: any) => {
+          instance.hide({ transitionOut: 'fadeOut' }, toast, 'button');
+        }]
+      ]
+    });
   }
 
   closeEcoModal() { this.showCreateModal = false; }
