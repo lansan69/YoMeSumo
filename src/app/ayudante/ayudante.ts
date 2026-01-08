@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms'; // <--- AGREGADO PARA EDITAR BOTON DE EDITAR
 import { Aside } from './aside/aside';
 import { Main } from './main/main';
 import { User, Post, PostApplicant } from '../models/post.model';
@@ -15,12 +16,13 @@ declare var lucide: any;
 
 @Component({
   selector: 'app-ayudante',
-  imports: [Aside, Main, CommonModule],
+  imports: [Aside, Main, CommonModule, FormsModule], //SOLO SE AGREGO FORMSMODULE 
   templateUrl: './ayudante.html',
   styleUrl: './ayudante.css',
 })
 
 export class Ayudante implements OnInit {
+  constructor(private db: DatabaseService) {} // <--- se agrego esta linea para usar el servicio de base de datos
   ngOnInit(): void {
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
@@ -33,6 +35,45 @@ export class Ayudante implements OnInit {
   //perfil, llamados, favoritos, contador
   currentScreen = "llamados";
   currentUser: User | undefined = undefined;
+
+  // --- INICIO BLOQUE EDICIÓN (SE AGREGO)---
+  isEditingProfile: boolean = false;
+
+  toggleEdit() {
+    this.isEditingProfile = !this.isEditingProfile;
+  }
+
+  // --- FUNCIÓN DE GUARDADO FINAL ---
+  saveProfile() {
+    if (!this.currentUser) return; // Seguridad por si acaso
+
+    // 1. Preparamos solo los datos que queremos enviar (para no enviar todo el objeto user)
+    const datosAActualizar = {
+      phone: this.currentUser.phone,
+      about: this.currentUser.about // Recuerda el signo ? en el modelo
+    };
+
+    console.log("Enviando a Firebase...", datosAActualizar);
+
+    // 2. Llamamos a tu servicio 'updateUser'
+    this.db.updateUser(this.currentUser.uid, datosAActualizar)
+      .then(() => {
+        // ÉXITO
+        console.log('¡Perfil actualizado correctamente!');
+        this.isEditingProfile = false; // Cerramos el modo edición
+      })
+      .catch((error) => {
+        // ERROR
+        console.error('Error al actualizar perfil:', error);
+        alert('Hubo un problema al guardar. Intenta de nuevo.');
+      });
+  }
+  // --- FIN BLOQUE EDICIÓN ---
+
+
+
+
+
 
   @Output() category = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();

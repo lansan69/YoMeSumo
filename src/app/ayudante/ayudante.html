@@ -98,11 +98,34 @@
                             </h1>
                             <p class="text-brand-dark font-medium mt-1 text-sm md:text-base">Activo desde el 2025</p>
         
+
+
+
+<!-- Edit Profile Button 
                             <button
                                 class="mt-4 text-xs font-bold text-brand-medium border-2 border-brand-medium px-6 py-2 rounded-full hover:bg-brand-medium hover:text-white transition-all shadow-sm active:scale-95">
                                 EDITAR MI HUELLA
                             </button>
+-->
+                            <!-- se modifico el boton de arriba por este-->
+                            <div class="flex gap-2 mt-4">
+                                <button (click)="toggleEdit()"
+                                    [class.bg-red-100]="isEditingProfile" 
+                                    [class.text-red-500]="isEditingProfile"
+                                    [class.border-red-500]="isEditingProfile"
+                                    class="text-xs font-bold text-brand-medium border-2 border-brand-medium px-6 py-2 rounded-full hover:bg-brand-medium hover:text-white transition-all shadow-sm active:scale-95">
+                                    {{ isEditingProfile ? 'CANCELAR' : 'EDITAR MI HUELLA' }}
+                                </button>
+
+                                <button *ngIf="isEditingProfile" (click)="saveProfile()"
+                                    class="text-xs font-bold text-white bg-green-600 border-2 border-green-600 px-6 py-2 rounded-full hover:bg-green-700 transition-all shadow-sm active:scale-95">
+                                    GUARDAR
+                                </button>
+                            </div>
+
+
                         </div>
+
         
                         <div class="w-full md:w-64 bg-white p-5 rounded-3xl shadow-sm border border-brand-light/30 shrink-0">
                             <div class="flex justify-between items-end mb-2">
@@ -132,8 +155,19 @@
                                         <div class="bg-brand-cream p-2 rounded-lg shrink-0">
                                             <i data-lucide="phone" class="w-4 h-4 text-brand-medium"></i>
                                         </div>
+                                        <!-- 
                                         <span class="text-sm font-medium break-all">{{ currentUser.phone || 'Sin teléfono'
-                                            }}</span>
+                                            }}</span>-->
+
+                                        <!-- se modifico la parte de arriba comentada por esto-->
+                                        <span *ngIf="!isEditingProfile" class="text-sm font-medium break-all">
+                                            {{ currentUser.phone || 'Sin teléfono' }}
+                                        </span>
+                                        <input *ngIf="isEditingProfile" type="text" [(ngModel)]="currentUser.phone"
+                                            class="text-sm font-medium w-full border-b-2 border-brand-medium/50 focus:border-brand-medium focus:outline-none bg-transparent text-brand-dark px-1"
+                                            placeholder="Tu teléfono">
+
+                                        
                                     </div>
                                     <div class="flex items-center gap-4 text-gray-600">
                                         <div class="bg-brand-cream p-2 rounded-lg shrink-0">
@@ -145,10 +179,19 @@
                             </div>
                             <div class="bg-brand-cream/40 p-5 rounded-2xl">
                                 <h4 class="font-bold mb-2 text-brand-dark text-[10px] uppercase tracking-wider"> Sobre mí</h4>
+                                <!-- 
                                 <p class="text-xs text-gray-500 leading-relaxed italic">
                                     "Me apasiona colaborar en albergues de animales y asilos. Siempre busco un espacio
                                     para sumar mis manos."
+                                </p> -->
+
+                                <!-- se modifico la parte de arriba comentada por esto-->
+                                <p *ngIf="!isEditingProfile" class="text-xs text-gray-500 leading-relaxed italic min-h-[3rem]">
+                                    "{{ currentUser.about || 'Escribe algo sobre ti para que las asociaciones te conozcan...' }}"
                                 </p>
+                                <textarea *ngIf="isEditingProfile" [(ngModel)]="currentUser.about"
+                                    class="w-full text-xs text-gray-700 bg-white/60 p-2 rounded-lg border-2 border-brand-medium/30 focus:outline-none focus:border-brand-medium custom-scrollbar resize-none"
+                                    rows="3" placeholder="Cuéntanos qué te motiva a ayudar..."></textarea>
                             </div>
                         </div>
         
