@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common'; // 1. Import this
 })
 export class App {
   // Options: 'unlogged', 'asociacion', 'usuario'
-  userStatus: string = 'usuario';
+  userStatus: string = 'unlogged';
 
   // Simple function to switch views for testing
   setView(status: string) {
